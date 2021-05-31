@@ -6,7 +6,7 @@
 #include "noncopyable.h"
 
 
-class EventLoop : noncopyable{
+class EventLoop : noncopyable {
 public:
     EventLoop();
     ~EventLoop();
