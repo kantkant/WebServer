@@ -1,5 +1,3 @@
-// @Author Lin Ya
-// @Email xxbbb@vip.qq.com
 #pragma once
 #include <pthread.h>
 #include <sys/syscall.h>
@@ -11,7 +9,7 @@
 #include "noncopyable.h"
 
 class Thread : noncopyable {
- public:
+public:
   typedef std::function<void()> ThreadFunc;
   explicit Thread(const ThreadFunc&, const std::string& name = std::string());
   ~Thread();
@@ -21,7 +19,7 @@ class Thread : noncopyable {
   pid_t tid() const { return tid_; }
   const std::string& name() const { return name_; }
 
- private:
+private:
   void setDefaultName();
   bool started_;
   bool joined_;
