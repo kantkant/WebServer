@@ -28,6 +28,7 @@ EventLoop* EventLoopThread::startLoop() {
 }
 
 EventLoopThread::~EventLoopThread() {
-    thread_.join(); //eventloop zai zui xian xi gou
+    loop_->quit();
+    thread_.join();
     loop_ = nullptr;
 }
