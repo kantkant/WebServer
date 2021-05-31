@@ -26,6 +26,5 @@ bool EventLoop::isloopInthisThread() const {return threadId_ == std::this_thread
 void EventLoop::quit() { quit_ = true;};
 
 EventLoop::~EventLoop() {
-    quit();
     loopInthisThread_ = nullptr;
 }

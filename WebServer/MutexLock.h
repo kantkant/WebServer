@@ -18,7 +18,7 @@ class MutexLock : noncopyable {
  private:
   pthread_mutex_t mutex;
 
-  // 友元类不受访问权限影响
+  //友元类不受访问权限影响
  private:
   friend class Condition;
 };
