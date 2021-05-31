@@ -11,9 +11,9 @@ public:
     EventLoop();
     ~EventLoop();
     void loop();
+    void quit();  
 private:
     bool isloopInthisThread() const;
-    void quit();  
     const std::thread::id threadId_;
     bool looping_;
     bool quit_;
