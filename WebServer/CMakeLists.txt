@@ -19,5 +19,15 @@ add_executable(${PROJECT_NAME}
 	EventLoop.h
 	main.cpp
 	Thread.h
+	Epoll.cpp
+	Epoll.h
+	Util.cpp
+	Util.h
+	Channel.h
+	Channel.cpp
+	TcpServer.cpp
+	TcpServer.h
+	HttpConn.cpp
+	HttpConn.h
 )
 target_link_libraries(${PROJECT_NAME} -lpthread)
