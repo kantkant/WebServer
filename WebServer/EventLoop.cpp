@@ -23,6 +23,7 @@ EventLoop::EventLoop()
         wakeupChannel_->setEvents(EPOLLIN|EPOLLET);
         wakeupChannel_->setReadcallback(std::bind(&EventLoop::handleRead, this)); //watch out std::bind
         epoller_->epoll_add(wakeupChannel_);
+        std::cout << "Create Fd" << wakeupFd_ <<std::endl;
     }
 
 
@@ -33,7 +34,7 @@ void EventLoop::loop() {
         std::vector<std::shared_ptr<Channel>> activechannel_;
         activechannel_ = epoller_->poll();
         for(auto& it : activechannel_) {
-            std::cout << "loopId : " << this << std::endl;
+            //std::cout << "loopId : " << this << std::endl;
             it->handleEvents();
             
         }
@@ -72,16 +73,16 @@ void EventLoop::queueInLoop(funcCallback&& cb) {
 }
 
 int EventLoop::createEventFd() {
-    int fd = 0;
-    if(fd = eventfd(0, EFD_NONBLOCK |EFD_CLOEXEC) < 0) {
+    int fd = eventfd(0, EFD_NONBLOCK |EFD_CLOEXEC);
         //fix bad syscall
-    }
     return fd;
 }
 
 void EventLoop::wakeup() { //where should i read?
     uint64_t spOffer = 1;
-    ssize_t n = writen(wakeupFd_, (char*)(&spOffer), sizeof spOffer); //figure out what's going on
+    //write(wakeupFd_, &spOffer, sizeof spOffer);
+    std::cout << "EventLoop::wakeupFd_ :" << wakeupFd_ << std::endl; 
+    ssize_t n = writen(wakeupFd_, &spOffer, sizeof spOffer); //figure out what's going on
 }
 
 void EventLoop::handleRead() {
@@ -99,5 +100,6 @@ void EventLoop::doPendingFunctors() {
     for(const auto& it : functors) {
         it();
     }
-    std::cout << "dopendingfunctors: " << functors.size() << std::endl;
+    //std::cout << "dopendingfunctors: " << functors.size() << std::endl;
+    //std::cout << this << "dopendingfunctors: " << functors.size() << std::endl;
 }

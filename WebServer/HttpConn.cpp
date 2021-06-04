@@ -26,6 +26,9 @@ void HttpConn::handleRead() {
     int fd = getChannel()->getFd();
     int n = readn(fd, inbuffer);
     std::cout << inbuffer << std::endl;
+    //test:
+    //channel_->setEvents(EPOLLOUT);
+    //loop_->epoller_->epoll_mod(channel_);
 }
 
 void HttpConn::handleNewEvents() {
