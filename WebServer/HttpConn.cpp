@@ -26,13 +26,17 @@ void HttpConn::handleRead() {
     int fd = getChannel()->getFd();
     int n = readn(fd, inbuffer);
     std::cout << inbuffer << std::endl;
-    //test:
-    //channel_->setEvents(EPOLLOUT);
-    //loop_->epoller_->epoll_mod(channel_);
+
 }
 
 void HttpConn::handleNewEvents() {
-    channel_->setEvents(EPOLLIN|EPOLLET);
-    loop_->epoller_->epoll_add(channel_);
+    channel_->setEvents(EPOLLIN | EPOLLET);
+    loop_->addtoPoller(channel_);
+    
     std::cout << "new Events handle OK" << std::endl;
+    /*
+        FILE* fp = fopen("1.txt", "w");
+    fprintf(fp, " ok");
+    fclose(fp);
+    */
 }
