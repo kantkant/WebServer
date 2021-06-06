@@ -12,8 +12,11 @@ public:
     void handleWrite();
     void tie();
     void handleNewEvents();
+    void handleClose();
 private:
     int fd_;
+    std::string inBuffer_;
+    std::string outBuffer_;
     std::shared_ptr<Channel> channel_;
     EventLoop* loop_;
 };

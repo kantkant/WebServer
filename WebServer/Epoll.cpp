@@ -13,11 +13,10 @@ Epoll::~Epoll() {}
 
 std::vector<std::shared_ptr<Channel>> Epoll::poll() {
     std::vector<std::shared_ptr<Channel>> activechannel_;
-    std::cout << "poller : polling" << std::endl;
+    //std::cout << "poller : polling" << std::endl;
     int event_nums = epoll_wait(epollfd_, &*events_.begin(), events_.size(), -1);
     for(int i = 0; i < event_nums; ++i) {
         int fd = events_[i].data.fd;
-        //std::cout << "Fd: " << fd <<std::endl;
         activechannel_.push_back(fd2chan_[fd]);
     }
     return activechannel_;
@@ -25,11 +24,11 @@ std::vector<std::shared_ptr<Channel>> Epoll::poll() {
 
 void Epoll::epoll_add(std::shared_ptr<Channel> channel) {
     int fd = channel->getFd();
+    fd2chan_[fd] = channel; //connect fd-channel
     struct epoll_event event;
     event.data.fd = fd;
     event.events = channel->getEvents();
     //event.events = EPOLLIN|EPOLLET;
-    fd2chan_[fd] = channel; //connect fd-channel
     epoll_ctl(epollfd_, EPOLL_CTL_ADD, fd, &event);
     //std::cout << "epoll_ctl: " <<epoll_ctl(epollfd_, EPOLL_CTL_ADD, fd, &event) << channel->getFd() << std::endl;
 }
@@ -48,12 +47,17 @@ void Epoll::epoll_del(std::shared_ptr<Channel> channel) {
     struct epoll_event event;
     event.data.fd = fd;
     event.events = channel->getEvents();
-    auto it = fd2chan_.begin();  //erase fd
-    fd2chan_.find(fd);
-    fd2chan_.erase(it);
     epoll_ctl(epollfd_, EPOLL_CTL_DEL, fd, &event);
+    auto itchan = fd2chan_.find(fd);  //erase fd
+    fd2chan_.erase(itchan);
+    auto ithttp = fd2http_.find(fd);
+    fd2http_.erase(ithttp);
 }
 
 std::shared_ptr<Channel> Epoll::getChannel(int fd) {
     return fd2chan_[fd];
+}
+
+void Epoll::setHttpConn(std::shared_ptr<HttpConn> httpconn, int fd) {
+    fd2http_[fd] = httpconn;
 }

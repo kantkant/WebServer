@@ -20,6 +20,8 @@ public:
     void epoll_del(std::shared_ptr<Channel> channel);
     std::vector<std::shared_ptr<Channel>> poll();
     std::shared_ptr<Channel> getChannel(int fd); //avoid shared_from_this
+    //void removeFromPoller(std::shared_ptr<Channel> channel);
+    void setHttpConn(std::shared_ptr<HttpConn> httpconn, int fd);
 private:
     int epollfd_;
     std::vector<epoll_event> events_;

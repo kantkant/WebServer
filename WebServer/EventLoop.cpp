@@ -19,13 +19,9 @@ EventLoop::EventLoop()
      wakeupChannel_(new Channel(this, wakeupFd_)) { //C++11 with std::thread::get_id()
         //assert(this == nullptr);  can't use in constructor, why?
         if(!loopInthisThread_) {loopInthisThread_ = this;}
-        //Epoll* tmpepoll_ = new Epoll(this);
         wakeupChannel_->setEvents(EPOLLIN | EPOLLET);
         wakeupChannel_->setReadcallback(std::bind(&EventLoop::handleRead, this)); //watch out std::bind
-        //epoller_->epoll_add(wakeupChannel_);
-        //std::cout << wakeupChannel_->getEvents() << std::endl;
         addtoPoller(wakeupChannel_);
-        std::cout << "Create Fd" << wakeupFd_ <<std::endl;
     }
 
 
@@ -54,11 +50,9 @@ EventLoop::~EventLoop() {
 void EventLoop::runInLoop(funcCallback&& cb) {
     if(isloopInthisThread()) {
         cb();
-        //std::cout << "run1-runinloop" << std::endl;
     }
     else {
         queueInLoop(std::move(cb));
-        //std::cout << "run2-runinloop" << std::endl;
     }
 }
 
@@ -67,7 +61,6 @@ void EventLoop::queueInLoop(funcCallback&& cb) {
         MutexLockGuard lock(mutex_);
         pendingfunctors_.push_back(std::move(cb)); //why task have to move?
     }
-    //std::cout << "pendingfunctors: " << pendingfunctors_.size() << std::endl;
     if(!isloopInthisThread() || callingPendingFunctors_) {
         wakeup();
     }
@@ -81,17 +74,14 @@ int EventLoop::createEventFd() {
 
 void EventLoop::wakeup() { //where should i read?
     uint64_t spOffer = 1;
-    //write(wakeupFd_, spOffer&spOffer, sizeof spOffer);
-    std::cout << "EventLoop::wakeupFd_ :" << wakeupFd_ << std::endl; 
-    //std::cout << "Events" << wakeupChannel_->getEvents() << std::endl;
+    //std::cout << "EventLoop::wakeupFd_ :" << wakeupFd_ << std::endl; 
     ssize_t n = writen(wakeupFd_, &spOffer, sizeof spOffer); //figure out what's going on
-    std::cout << n << std::endl;
+    //std::cout << n << std::endl;
 }
 
 void EventLoop::handleRead() {
     uint64_t spOffer = 1;
     ssize_t n = readn(wakeupFd_, &spOffer, sizeof spOffer); //figure out what's going on
-    //epoller_->epoll_mod(wakeupChannel_); //reset wakeupchannel_
 }
 
 void EventLoop::doPendingFunctors() {
@@ -105,9 +95,6 @@ void EventLoop::doPendingFunctors() {
         it();
     }
     callingPendingFunctors_ = false;
-
-    //std::cout << "dopendingfunctors: " << functors.size() << std::endl;
-    //std::cout << this << "dopendingfunctors: " << functors.size() << std::endl;
 }
 
 void EventLoop::addtoPoller(std::shared_ptr<Channel> channel) {
@@ -116,4 +103,8 @@ void EventLoop::addtoPoller(std::shared_ptr<Channel> channel) {
 
 void EventLoop::updatePoller(std::shared_ptr<Channel> channel) {
     epoller_->epoll_mod(channel);
+}
+
+void EventLoop::removeFromPoller(std::shared_ptr<Channel> channel) {
+    epoller_->epoll_del(channel);
 }
