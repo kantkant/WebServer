@@ -36,15 +36,14 @@ void Channel::handleWrite() {
         writecallback_();
     }
 }
-
+/*
 void Channel::handleConn() { //abandon
-    addtoPoller(shared_from_this());
-    std::cout << "handleconn1" <<  std::endl;
+    loop_->addtoPoller(shared_from_this());
     if(conncallback_) {
-        std::cout << "handleconn" << std::endl;
         conncallback_();
     }
 }
+*/
 
 void Channel::handleError() {
     if(errorcallback_) {
@@ -81,24 +80,32 @@ void Channel::setFd(int fd) { fd_ = fd; }
 int Channel::getFd() { return fd_; }
 
 void Channel::handleEvents() {
-    if((events_ & EPOLLHUP) && !(events_ & EPOLLIN)) {
-        handleClose();
+    if((events_ & EPOLLHUP) && !(events_ & EPOLLIN) && closecallback_) {  //& priority is higher then &&
+        handleClose(); 
     }
-    else if(events_ & EPOLLERR) {
+    else if(events_ & EPOLLERR && errorcallback_) {
         handleError();
     }
-    else if(events_ & (EPOLLIN | EPOLLPRI | EPOLLRDHUP)) {
+    else if(events_ & (EPOLLIN | EPOLLPRI | EPOLLRDHUP) && readcallback_) {
         handleRead();
     }
-    else if(events_ & EPOLLOUT) {
+    else if(events_ & EPOLLOUT && writecallback_) {
         handleWrite();
     }
 }
-
+/*
 void Channel::updatePoller(std::shared_ptr<Channel> channel) {
-    loop_->epoller_->epoll_mod(channel);
+    //loop_->epoller_->epoll_mod(channel);
+    loop_->updatePoller(channel);
 }
 
 void Channel::addtoPoller(std::shared_ptr<Channel> channel) {
-    loop_->epoller_->epoll_add(channel);
+    //loop_->epoller_->epoll_add(channel);
+    loop_->addtoPoller(channel);
 }
+
+void Channel::removeFromPoller(std::shared_ptr<Channel> channel) {
+    //loop_->epoller_->epoll_del(channel);
+    loop_->removeFromPoller(channel);
+}
+*/

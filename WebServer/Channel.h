@@ -13,9 +13,13 @@ class HttpConn;
 
 class Channel : noncopyable ,public std::enable_shared_from_this<Channel> {
 private:
-    typedef std::function<void()> CallBack; //fix bug.should ahead of class.
+    typedef std::function<void()> CallBack; //fix bug.should ahead of class
+/*
+public:
     void updatePoller(std::shared_ptr<Channel> channel);
     void addtoPoller(std::shared_ptr<Channel> channel);
+    void removeFromPoller(std::shared_ptr<Channel> channel);
+*/
 public:
     Channel(EventLoop* loop, int fd);
     Channel(EventLoop* loop);

@@ -24,11 +24,12 @@ public:
     void doPendingFunctors();
     void addtoPoller(std::shared_ptr<Channel> channel);
     void updatePoller(std::shared_ptr<Channel> channel);
+    void removeFromPoller(std::shared_ptr<Channel> channel);
 private:
     bool isloopInthisThread() const;
     void handleRead();
-    void queueInLoop(funcCallback&& cb);
     void wakeup();
+    void queueInLoop(funcCallback&& cb);
     int createEventFd();
     int wakeupFd_;
     const std::thread::id threadId_;
@@ -39,5 +40,5 @@ private:
     bool callingPendingFunctors_;
     std::shared_ptr<Channel> wakeupChannel_;
 public:
-    std::unique_ptr<Epoll> epoller_;
+    std::shared_ptr<Epoll> epoller_;
 };
