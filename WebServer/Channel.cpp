@@ -28,7 +28,7 @@ void Channel::handleRead() {
     if(readcallback_) {
         readcallback_();
     }
-    updatePoller(this);
+    //updatePoller(this);
 }
 
 void Channel::handleWrite() {

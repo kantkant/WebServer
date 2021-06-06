@@ -47,13 +47,13 @@ public:
     
 private:
     __uint32_t events_;
-    __uint32_t lastevents_;
+    //__uint32_t lastevents_;
     EventLoop* loop_;
     int fd_;
     std::weak_ptr<HttpConn> holder_;
     CallBack readcallback_;
     CallBack writecallback_;
     CallBack errorcallback_;
-    CallBack conncallback_;
+    CallBack conncallback_; //work?
     CallBack closecallback_;
 };
