@@ -20,12 +20,13 @@ EventLoop::EventLoop()
         //assert(this == nullptr);  can't use in constructor, why?
         if(!loopInthisThread_) {loopInthisThread_ = this;}
         //Epoll* tmpepoll_ = new Epoll(this);
-        wakeupChannel_->setEvents(EPOLLIN|EPOLLET);
+        wakeupChannel_->setEvents(EPOLLIN | EPOLLET);
         wakeupChannel_->setReadcallback(std::bind(&EventLoop::handleRead, this)); //watch out std::bind
-        epoller_->epoll_add(wakeupChannel_);
+        //epoller_->epoll_add(wakeupChannel_);
+        //std::cout << wakeupChannel_->getEvents() << std::endl;
+        addtoPoller(wakeupChannel_);
         std::cout << "Create Fd" << wakeupFd_ <<std::endl;
     }
-
 
 
 void EventLoop::loop() {
@@ -73,16 +74,18 @@ void EventLoop::queueInLoop(funcCallback&& cb) {
 }
 
 int EventLoop::createEventFd() {
-    int fd = eventfd(0, EFD_NONBLOCK |EFD_CLOEXEC);
+    int fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
         //fix bad syscall
     return fd;
 }
 
 void EventLoop::wakeup() { //where should i read?
     uint64_t spOffer = 1;
-    //write(wakeupFd_, &spOffer, sizeof spOffer);
+    //write(wakeupFd_, spOffer&spOffer, sizeof spOffer);
     std::cout << "EventLoop::wakeupFd_ :" << wakeupFd_ << std::endl; 
+    //std::cout << "Events" << wakeupChannel_->getEvents() << std::endl;
     ssize_t n = writen(wakeupFd_, &spOffer, sizeof spOffer); //figure out what's going on
+    std::cout << n << std::endl;
 }
 
 void EventLoop::handleRead() {
@@ -93,6 +96,7 @@ void EventLoop::handleRead() {
 
 void EventLoop::doPendingFunctors() {
     std::vector<funcCallback> functors;
+    callingPendingFunctors_ = true;
     {
         MutexLockGuard lock(mutex_);
         functors.swap(pendingfunctors_);
@@ -100,6 +104,16 @@ void EventLoop::doPendingFunctors() {
     for(const auto& it : functors) {
         it();
     }
+    callingPendingFunctors_ = false;
+
     //std::cout << "dopendingfunctors: " << functors.size() << std::endl;
     //std::cout << this << "dopendingfunctors: " << functors.size() << std::endl;
+}
+
+void EventLoop::addtoPoller(std::shared_ptr<Channel> channel) {
+    epoller_->epoll_add(channel);
+}
+
+void EventLoop::updatePoller(std::shared_ptr<Channel> channel) {
+    epoller_->epoll_mod(channel);
 }

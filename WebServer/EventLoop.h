@@ -22,13 +22,15 @@ public:
     void quit();
     void runInLoop(funcCallback&& cb);
     void doPendingFunctors();
+    void addtoPoller(std::shared_ptr<Channel> channel);
+    void updatePoller(std::shared_ptr<Channel> channel);
 private:
     bool isloopInthisThread() const;
     void handleRead();
     void queueInLoop(funcCallback&& cb);
     void wakeup();
     int createEventFd();
-    void addtoPoller(Channel* channel);
+    int wakeupFd_;
     const std::thread::id threadId_;
     bool looping_;
     bool quit_;
@@ -36,7 +38,6 @@ private:
     std::vector<funcCallback> pendingfunctors_;
     bool callingPendingFunctors_;
     std::shared_ptr<Channel> wakeupChannel_;
-    int wakeupFd_;
 public:
     std::unique_ptr<Epoll> epoller_;
 };

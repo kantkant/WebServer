@@ -38,7 +38,7 @@ void Channel::handleWrite() {
 }
 
 void Channel::handleConn() { //abandon
-    addtoPoller(this);
+    addtoPoller(shared_from_this());
     std::cout << "handleconn1" <<  std::endl;
     if(conncallback_) {
         std::cout << "handleconn" << std::endl;
@@ -95,12 +95,10 @@ void Channel::handleEvents() {
     }
 }
 
-void Channel::updatePoller(Channel* channel) {
-    std::shared_ptr<Channel> ch = loop_->epoller_->getChannel(fd_);
-    loop_->epoller_->epoll_mod(ch);
+void Channel::updatePoller(std::shared_ptr<Channel> channel) {
+    loop_->epoller_->epoll_mod(channel);
 }
 
-void Channel::addtoPoller(Channel* channel) {
-    std::shared_ptr<Channel> ch = loop_->epoller_->getChannel(fd_);
-    loop_->epoller_->epoll_add(ch);
+void Channel::addtoPoller(std::shared_ptr<Channel> channel) {
+    loop_->epoller_->epoll_add(channel);
 }

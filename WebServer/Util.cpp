@@ -47,8 +47,6 @@ ssize_t readn(int fd, std::string &inBuffer, bool &zero) {
         perror("read error");
         return -1;
       }
-    } else if (nread == 0) {
-      // printf("redsum = %d\n", readSum);
       zero = true;
       break;
     }
