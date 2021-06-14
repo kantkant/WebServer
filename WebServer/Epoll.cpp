@@ -2,7 +2,7 @@
 #include "EventLoop.h"
 #include "Channel.h"
 
-#define TIMEOUT 10000
+#define TIMEOUT 5000
 Epoll::Epoll(EventLoop* loop)
     :loop_(loop),
     epollfd_(epoll_create(EPOLL_CLOEXEC)), 

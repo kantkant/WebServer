@@ -7,14 +7,14 @@ class HttpConn;
 
 class TimerNode {
 public:
-    TimerNode(std::shared_ptr<HttpConn> httpconn, int timeout);
-    ~TimerNode();
-    void update(int timeout); //update expire time
-    bool isValid(); //is timeout?
-    size_t getExpTime(); //return timeout
-    void setDeleted();
-    bool isDeleted();
-    void clearReq();
+  TimerNode(std::shared_ptr<HttpConn> httpconn, int timeout);
+  ~TimerNode();
+  void update(int timeout); //update expire time
+  bool isValid(); //is timeout?
+  size_t getExpTime(); //return timeout
+  void setDeleted();
+  bool isDeleted();
+  void clearReq();
 private:
     size_t expTime_;
     bool isDeleted_;
@@ -28,12 +28,12 @@ struct TimerCmp {
 };
 
 class TimerManager {
- public:
+public:
   TimerManager();
   ~TimerManager();
   void addTimer(std::shared_ptr<HttpConn> httpconn, int timeout);
   void handleExpiredEvent();
 
- private:
+private:
   std::priority_queue<std::shared_ptr<TimerNode>, std::deque<std::shared_ptr<TimerNode>>, TimerCmp> timerNodeQueue;
 };
