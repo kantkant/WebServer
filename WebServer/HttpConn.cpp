@@ -8,8 +8,8 @@
 #include <cstring>
 #include <sys/mman.h>
 
-const int DEFAULT_EXPIRED_TIME = 200000; //200s
-const int DEFAULT_KEEP_ALIVE_TIME = 5 * 60 * 100000; //5000min
+const int DEFAULT_EXPIRED_TIME = 2000; //2s telnet default shortConn
+const int DEFAULT_KEEP_ALIVE_TIME = 5 * 60 * 100; //30s  browser defalut keep-alive
 
 pthread_once_t MimeType::once_control = PTHREAD_ONCE_INIT;
 std::unordered_map<std::string, std::string> MimeType::mime;
@@ -71,12 +71,19 @@ std::shared_ptr<Channel> HttpConn::getChannel() {
 
 void HttpConn::handleRead() {
     httpAnalysisRequest(); //what if error?
-    std::cout << "handleRead" << std::endl;
+    //std::cout << "handleRead" << std::endl;
+    if(!error_ && state_ == STATE_FINISH) {
+        //std::cout << "finish" << std::endl;
+        reSet();
+    }
+    if(error_) {
+        handleClose();
+    }
     if(!error_ && outBuffer_.size() > 0) {
         channel_->setEvents(EPOLLOUT | EPOLLET);
         if(timer_.lock()) {
             std::shared_ptr<TimerNode> my_timer(timer_.lock());
-            std::cout << "req" << std::endl;
+            //std::cout << "req" << std::endl;
             my_timer->clearReq();
             timer_.reset();
         }
@@ -88,24 +95,6 @@ void HttpConn::handleRead() {
         }
         return;
     }
-    if(!error_ && state_ == STATE_FINISH) {
-        std::cout << "finish" << std::endl;
-        reSet();
-    }
-    if(error_) {
-        handleClose();
-    }
-    /*
-    if(!error_ && state_ == STATE_FINISH && inBuffer_.size() > 0 && connectionState_ != H_DISCONNECTING) {
-        //add bool for !inbffer.clear()
-        channel_->setEvents(EPOLLIN | EPOLLET);
-        loop_->updatePoller(channel_);
-        return;
-    }
-    if(!error_ && connectionState_ != H_DISCONNECTED) {
-         events_ |= EPOLLIN;
-    }
-    */
 }
 
 void HttpConn::handleWrite() {
@@ -116,13 +105,11 @@ void HttpConn::handleWrite() {
     if(!error_ && connectionState_ != H_DISCONNECTED && writeNum < 0) {
        // std::cout << "handleWrite" << std::endl;
         channel_->setEvents(0);
-        //loop_->updatePoller(channel_);
         error_ = true;
     }
     if(!error_ && connectionState_ != H_DISCONNECTED && outBuffer_.size() == 0) {
-        std::cout << "handleWrite" << std::endl;
+        //std::cout << "handleWrite" << std::endl;
         channel_->setEvents(EPOLLIN | EPOLLET);
-        //loop_->updatePoller(channel_);
     }
     if(timer_.lock()) {
         std::shared_ptr<TimerNode> my_timer(timer_.lock());
@@ -387,6 +374,7 @@ AnalysisState HttpConn::analysisRequest() {  //outbuffer write
         // echo test
         if(fileName_ == "hello") {
             outBuffer_ = "HTTP/1.1 200 OK\r\nContent-type: text/plain\r\nContent-Length: 11\r\n\r\nHello World\n"; //browser analysis needs content-length
+            state_ == STATE_FINISH;
             return ANALYSIS_SUCCESS;
         }
 
@@ -397,6 +385,7 @@ AnalysisState HttpConn::analysisRequest() {  //outbuffer write
             header += "\r\n";
             outBuffer_ += header;
             outBuffer_ += std::string(favicon_, favicon_ + sizeof favicon_);
+            state_ == STATE_FINISH;
             return ANALYSIS_SUCCESS;
         }
         struct stat sbuf;
@@ -521,13 +510,4 @@ void HttpConn::reSet() {
     state_ = STATE_PARSE_URI;
     hState_ = H_START;
     headers_.clear();
-    //inBuffer_.clear();
-    /*
-    if(timer_.lock()) {
-        std::shared_ptr<TimerNode> my_timer(timer_.lock());
-        std::cout << "req" << std::endl;
-        my_timer->clearReq();
-        timer_.reset();
-    }
-    */
 }
