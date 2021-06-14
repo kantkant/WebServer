@@ -80,16 +80,16 @@ void Channel::setFd(int fd) { fd_ = fd; }
 int Channel::getFd() { return fd_; }
 
 void Channel::handleEvents() {
-    if((events_ & EPOLLHUP) && !(events_ & EPOLLIN) && closecallback_) {  //& priority is higher then &&
+    if(events_ & EPOLLHUP && !(events_ & EPOLLIN) && closecallback_) {  //& priority is higher then &&
         handleClose(); 
     }
-    else if(events_ & EPOLLERR && errorcallback_) {
+    if(events_ & EPOLLERR && errorcallback_) {
         handleError();
     }
-    else if(events_ & (EPOLLIN | EPOLLPRI | EPOLLRDHUP) && readcallback_) {
+    if(events_ & (EPOLLIN | EPOLLPRI | EPOLLRDHUP) && readcallback_) {
         handleRead();
     }
-    else if(events_ & EPOLLOUT && writecallback_) {
+    if(events_ & EPOLLOUT && writecallback_) {
         handleWrite();
     }
 }

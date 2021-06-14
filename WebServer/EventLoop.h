@@ -22,8 +22,8 @@ public:
     void quit();
     void runInLoop(funcCallback&& cb);
     void doPendingFunctors();
-    void addtoPoller(std::shared_ptr<Channel> channel);
-    void updatePoller(std::shared_ptr<Channel> channel);
+    void addtoPoller(std::shared_ptr<Channel> channel, int timeout = 0);
+    void updatePoller(std::shared_ptr<Channel> channel, int timeout = 0);
     void removeFromPoller(std::shared_ptr<Channel> channel);
 private:
     bool isloopInthisThread() const;

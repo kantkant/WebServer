@@ -1,4 +1,3 @@
-#pragma once
 #include <iostream>
 #include "EventLoopThreadPool.h"
 #include "EventLoop.h"
@@ -14,8 +13,6 @@
 void hello(){
     std::cout << "Hello, ssp offer!" << std::endl;
 }
-
-
 
 int main(){  
     EventLoop loop;

@@ -7,7 +7,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <iostream>
+
 
 const int MAX_BUFF = 4096;
 ssize_t readn(int fd, void *buff, size_t n) {
@@ -47,6 +47,8 @@ ssize_t readn(int fd, std::string &inBuffer, bool &zero) {
         perror("read error");
         return -1;
       }
+    } else if (nread == 0) {
+      // printf("redsum = %d\n", readSum);
       zero = true;
       break;
     }
