@@ -7,6 +7,9 @@
 #include <string.h>
 #include "EventLoopThreadPool.h"
 #include "HttpConn.h"
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 TcpServer::TcpServer(EventLoop* loop, int threadnum, int port) 
     :loop_(loop), 
@@ -14,6 +17,7 @@ TcpServer::TcpServer(EventLoop* loop, int threadnum, int port)
      port_(port),
      eventloopThreadpool_(new EventLoopThreadPool(threadNum_, loop_)),
      start_(false),
+     idleFd_(open("/dev/null", O_RDONLY | O_CLOEXEC)),
      listenFd_(socket_bind_listen(port_)) {
         setSocketNonBlocking(listenFd_);
         setSocketNodelay(listenFd_);
@@ -45,12 +49,24 @@ void TcpServer::handleConnection() { //send work to channel
         if(setSocketNonBlocking(acceptFd) < 0) {
             //deal bad syscall
         }
+        /*
+        if(acceptFd >= 10000) {
+            close(acceptFd);
+            continue;
+        }
+        */
         setSocketNodelay(acceptFd);
         std::shared_ptr<HttpConn> httpconn(new HttpConn(subLoop, acceptFd));
         subLoop->runInLoop(std::bind(&HttpConn::tie, httpconn));
         subLoop->runInLoop(std::bind(&Epoll::setHttpConn, subLoop->epoller_, httpconn, acceptFd)); //avoid HttpConn distruct
         //subLoop->epoller_->setHttpConn(httpconn, acceptFd);
         subLoop->runInLoop(std::bind(&HttpConn::handleNewEvents, httpconn)); //set conn task in channel
+    }
+    if(errno == EMFILE) {
+        close(idleFd_);
+        idleFd_ = accept(listenFd_, (struct sockaddr*)&clientAddr, &clientAddrLen);
+        close(idleFd_);
+        idleFd_ = open("/dev/null", O_RDONLY | O_CLOEXEC);
     }
     //acceptChannel_->setEvents(EPOLLIN|EPOLLET); //for subChannel to do : resgister epoller . done
 }//think about callbacks in channel

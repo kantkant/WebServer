@@ -30,7 +30,6 @@ void EventLoop::loop() {
         std::vector<std::shared_ptr<Channel>> activechannel_;
         activechannel_ = epoller_->poll();
         for(auto& it : activechannel_) {
-            //std::cout << "loopId : " << this << std::endl;
             it->handleEvents();
         }
         doPendingFunctors();

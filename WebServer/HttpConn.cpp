@@ -8,8 +8,8 @@
 #include <cstring>
 #include <sys/mman.h>
 
-const int DEFAULT_EXPIRED_TIME = 2000; //2s telnet default shortConn
-const int DEFAULT_KEEP_ALIVE_TIME = 5 * 60 * 100; //30s  browser defalut keep-alive
+const int DEFAULT_EXPIRED_TIME = 1; //2s telnet default shortConn
+const int DEFAULT_KEEP_ALIVE_TIME = 5 * 60 * 1; //30s  browser defalut keep-alive
 
 pthread_once_t MimeType::once_control = PTHREAD_ONCE_INIT;
 std::unordered_map<std::string, std::string> MimeType::mime;
@@ -55,15 +55,14 @@ HttpConn::HttpConn(EventLoop* loop, int fd)
          channel_->setReadcallback(std::bind(&HttpConn::handleRead, this));
          channel_->setWritecallback(std::bind(&HttpConn::handleWrite, this));
          channel_->setCloseCallBack(std::bind(&HttpConn::handleClose, this));
-         std::cout << "httpConn construct" << std::endl;
+        // std::cout << "httpConn construct" << std::endl;
     }
 
-HttpConn::~HttpConn() { std::cout << "httpConn distruct" << std::endl; };
+HttpConn::~HttpConn() {};//std::cout << "httpConn distruct" << std::endl;
 
 void HttpConn::tie() {
     channel_->setHolder(shared_from_this()); //can not set in constructor
 }
-
 
 std::shared_ptr<Channel> HttpConn::getChannel() {
     return channel_;
@@ -83,7 +82,6 @@ void HttpConn::handleRead() {
         channel_->setEvents(EPOLLOUT | EPOLLET);
         if(timer_.lock()) {
             std::shared_ptr<TimerNode> my_timer(timer_.lock());
-            //std::cout << "req" << std::endl;
             my_timer->clearReq();
             timer_.reset();
         }
@@ -127,7 +125,7 @@ void HttpConn::handleWrite() {
 void HttpConn::handleNewEvents() {
     channel_->setEvents(EPOLLIN | EPOLLET);
     loop_->addtoPoller(channel_, DEFAULT_EXPIRED_TIME);
-    std::cout << "new Events handle OK" << std::endl;
+    //std::cout << "new Events handle OK" << std::endl;
 }
 
 void HttpConn::handleClose() {

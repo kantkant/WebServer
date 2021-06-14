@@ -23,4 +23,5 @@ private:
     bool start_;
     int port_;
     int listenFd_;
+    int idleFd_;
 };

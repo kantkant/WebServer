@@ -20,12 +20,9 @@ void EventLoopThreadPool::start() {
 }
 
 EventLoop* EventLoopThreadPool::getNextLoop() {
-    if(next_ >= numThreads_) {
-        next_ = 1;
-        return loops_[0];
-    }
-    return loops_[next_++];
-
+    EventLoop* loop = loops_[next_];
+    next_ = (next_ + 1) % numThreads_;
+    return loop;
 }
 
 EventLoopThreadPool::~EventLoopThreadPool() {}
