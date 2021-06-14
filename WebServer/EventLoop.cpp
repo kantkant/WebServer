@@ -24,7 +24,6 @@ EventLoop::EventLoop()
         addtoPoller(wakeupChannel_);
     }
 
-
 void EventLoop::loop() {
     assert(isloopInthisThread());
     while(!quit_) {
@@ -33,9 +32,9 @@ void EventLoop::loop() {
         for(auto& it : activechannel_) {
             //std::cout << "loopId : " << this << std::endl;
             it->handleEvents();
-            
         }
         doPendingFunctors();
+        epoller_->handleExpired();
     }     
 }
 
@@ -97,12 +96,12 @@ void EventLoop::doPendingFunctors() {
     callingPendingFunctors_ = false;
 }
 
-void EventLoop::addtoPoller(std::shared_ptr<Channel> channel) {
-    epoller_->epoll_add(channel);
+void EventLoop::addtoPoller(std::shared_ptr<Channel> channel, int timeout) {
+    epoller_->epoll_add(channel, timeout);
 }
 
-void EventLoop::updatePoller(std::shared_ptr<Channel> channel) {
-    epoller_->epoll_mod(channel);
+void EventLoop::updatePoller(std::shared_ptr<Channel> channel, int timeout) {
+    epoller_->epoll_mod(channel, timeout);
 }
 
 void EventLoop::removeFromPoller(std::shared_ptr<Channel> channel) {

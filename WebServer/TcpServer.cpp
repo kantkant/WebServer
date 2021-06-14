@@ -28,7 +28,8 @@ void TcpServer::start() {
     acceptChannel_->setEvents(EPOLLIN|EPOLLET);
     acceptChannel_->setReadcallback(std::bind(&TcpServer::handleConnection, this));
     eventloopThreadpool_->start();
-    loop_->epoller_->epoll_add(acceptChannel_);
+    //loop_->epoller_->epoll_add(acceptChannel_, 0);
+    loop_->addtoPoller(acceptChannel_);
     //std::cout << "TcpServer start" << std::endl;
 }
 
@@ -46,9 +47,10 @@ void TcpServer::handleConnection() { //send work to channel
         }
         setSocketNodelay(acceptFd);
         std::shared_ptr<HttpConn> httpconn(new HttpConn(subLoop, acceptFd));
+        subLoop->runInLoop(std::bind(&HttpConn::tie, httpconn));
         subLoop->runInLoop(std::bind(&Epoll::setHttpConn, subLoop->epoller_, httpconn, acceptFd)); //avoid HttpConn distruct
         //subLoop->epoller_->setHttpConn(httpconn, acceptFd);
         subLoop->runInLoop(std::bind(&HttpConn::handleNewEvents, httpconn)); //set conn task in channel
     }
-    acceptChannel_->setEvents(EPOLLIN|EPOLLET); //for subChannel to do : resgister epoller . done
+    //acceptChannel_->setEvents(EPOLLIN|EPOLLET); //for subChannel to do : resgister epoller . done
 }//think about callbacks in channel

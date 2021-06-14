@@ -11,7 +11,7 @@
 class EventLoop;
 class HttpConn;
 
-class Channel : noncopyable ,public std::enable_shared_from_this<Channel> {
+class Channel : noncopyable ,public std::enable_shared_from_this<Channel> { //C++11
 private:
     typedef std::function<void()> CallBack; //fix bug.should ahead of class
 /*
