@@ -1,10 +1,10 @@
 #include <iostream>
 #include "Timer.h"
 #include <sys/time.h>
-#include "HttpConn.h"
+#include "Channel.h"
 
-TimerNode::TimerNode(std::shared_ptr<HttpConn> httpconn, int timeout)
-    :httpConn_(httpconn),
+TimerNode::TimerNode(std::shared_ptr<Channel> channel, int timeout)
+    :channel_(channel),
      isDeleted_(false) {
         struct timeval now; //ms
         gettimeofday(&now, nullptr);
@@ -12,8 +12,8 @@ TimerNode::TimerNode(std::shared_ptr<HttpConn> httpconn, int timeout)
     }
 
 TimerNode::~TimerNode() {
-    if(httpConn_) {
-        httpConn_->handleClose();
+    if(channel_) {
+      channel_->handleClose();
     }
 }
 
@@ -49,7 +49,7 @@ bool TimerNode::isDeleted() {
 }
 
 void TimerNode::clearReq() {
-  httpConn_.reset(); //unbind httpConn->TimerNode
+  channel_.reset(); //unbind TimerNode->channel
   setDeleted();
 }
 
@@ -57,10 +57,10 @@ TimerManager::TimerManager() {}
 
 TimerManager::~TimerManager() {}
 
-void TimerManager::addTimer(std::shared_ptr<HttpConn> httpconn, int timeout) {
-  std::shared_ptr<TimerNode> new_node(new TimerNode(httpconn, timeout));
+void TimerManager::addTimer(std::shared_ptr<Channel> channel, int timeout) {
+  std::shared_ptr<TimerNode> new_node(new TimerNode(channel, timeout));
   timerNodeQueue.push(new_node);
-  httpconn->linkTimer(new_node);
+  channel->linkTimer(new_node);
 }
 
 void TimerManager::handleExpiredEvent() {

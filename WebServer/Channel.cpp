@@ -2,17 +2,22 @@
 #include <iostream>
 #include <memory>
 
+
+
 Channel::Channel(EventLoop* loop, int fd)
     :loop_(loop),
      fd_(fd),
-     events_(0) {}
+     events_(0),
+     expiredTime_(0) {}
 
 Channel::Channel(EventLoop* loop)
     :loop_(loop),
      fd_(0),
      events_(0) {}
 
-Channel::~Channel() {}
+Channel::~Channel() {
+    close(fd_);
+}
 
 void Channel::setReadcallback(CallBack&& cb) { readcallback_ = std::move(cb); }
 
@@ -28,7 +33,6 @@ void Channel::handleRead() {
     if(readcallback_) {
         readcallback_();
     }
-    //updatePoller(this);
 }
 
 void Channel::handleWrite() {
@@ -36,14 +40,6 @@ void Channel::handleWrite() {
         writecallback_();
     }
 }
-/*
-void Channel::handleConn() { //abandon
-    loop_->addtoPoller(shared_from_this());
-    if(conncallback_) {
-        conncallback_();
-    }
-}
-*/
 
 void Channel::handleError() {
     if(errorcallback_) {
@@ -55,18 +51,13 @@ void Channel::handleClose() {
     if(closecallback_) {
         closecallback_();
     }
-} //extra option, may not work
+}
 
 void Channel::setEvents(__uint32_t event) {
     events_ = event; 
-    //setlastEvents(events_); //abandon
 }
 
 __uint32_t Channel::getEvents() { return events_; } //should be a reference type
-
-//void Channel::setlastEvents(__uint32_t event) { lastevents_ = event; } 
-
-//__uint32_t Channel::getlastEvents() { return lastevents_; }
 
 void Channel::setHolder(std::shared_ptr<HttpConn> httpconn) { holder_ = httpconn; }
 
@@ -79,8 +70,9 @@ void Channel::setFd(int fd) { fd_ = fd; }
 
 int Channel::getFd() { return fd_; }
 
-void Channel::handleEvents() {
-    if(events_ & EPOLLHUP && !(events_ & EPOLLIN) && closecallback_) {  //& priority is higher then &&
+void Channel::handleEvents(TimerManager timerManager) {
+    handleTimer(timerManager);
+    if(events_ & EPOLLHUP && !(events_ & EPOLLIN) && closecallback_) {  //&'s priority is higher then &&
         handleClose(); 
     }
     if(events_ & EPOLLERR && errorcallback_) {
@@ -93,19 +85,26 @@ void Channel::handleEvents() {
         handleWrite();
     }
 }
-/*
-void Channel::updatePoller(std::shared_ptr<Channel> channel) {
-    //loop_->epoller_->epoll_mod(channel);
-    loop_->updatePoller(channel);
+
+void Channel::handleTimer(TimerManager timerManager) {
+    untieTimer(); //priority can't support "find"
+    std::shared_ptr<HttpConn> httpconn = getHolder();
+    if(httpconn) {
+        timerManager.addTimer(shared_from_this(), expiredTime_);
+    }
+    else {
+        //httpconn distruct
+    }
 }
 
-void Channel::addtoPoller(std::shared_ptr<Channel> channel) {
-    //loop_->epoller_->epoll_add(channel);
-    loop_->addtoPoller(channel);
+void Channel::linkTimer(std::shared_ptr<TimerNode> timernode) {
+    timer_ = timernode;
 }
 
-void Channel::removeFromPoller(std::shared_ptr<Channel> channel) {
-    //loop_->epoller_->epoll_del(channel);
-    loop_->removeFromPoller(channel);
+void Channel::untieTimer() {
+    if(timer_.lock()) {
+        std::shared_ptr<TimerNode> my_timer(timer_.lock());
+        my_timer->clearReq();
+        timer_.reset();
+    }
 }
-*/

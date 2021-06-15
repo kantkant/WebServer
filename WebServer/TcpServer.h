@@ -4,6 +4,7 @@
 #include "EventLoop.h"
 #include "EventLoopThreadPool.h"
 #include "Channel.h"
+#include "HttpConn.h"
 
 class TcpServer : noncopyable {
 public:

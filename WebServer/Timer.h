@@ -3,11 +3,11 @@
 #include <memory>
 #include <queue>
 
-class HttpConn;
+class Channel;
 
 class TimerNode {
 public:
-  TimerNode(std::shared_ptr<HttpConn> httpconn, int timeout);
+  TimerNode(std::shared_ptr<Channel> channel, int timeout);
   ~TimerNode();
   void update(int timeout); //update expire time
   bool isValid(); //is timeout?
@@ -18,7 +18,7 @@ public:
 private:
     size_t expTime_;
     bool isDeleted_;
-    std::shared_ptr<HttpConn> httpConn_;
+    std::shared_ptr<Channel> channel_;
 };
 
 struct TimerCmp {
@@ -31,9 +31,8 @@ class TimerManager {
 public:
   TimerManager();
   ~TimerManager();
-  void addTimer(std::shared_ptr<HttpConn> httpconn, int timeout);
+  void addTimer(std::shared_ptr<Channel> channel, int timeout);
   void handleExpiredEvent();
-
 private:
   std::priority_queue<std::shared_ptr<TimerNode>, std::deque<std::shared_ptr<TimerNode>>, TimerCmp> timerNodeQueue;
 };

@@ -30,14 +30,16 @@ void EventLoop::loop() {
         std::vector<std::shared_ptr<Channel>> activechannel_;
         activechannel_ = epoller_->poll();
         for(auto& it : activechannel_) {
-            it->handleEvents();
+            it->handleEvents(timerManager_);
         }
         doPendingFunctors();
-        epoller_->handleExpired();
+        handleExpired();
     }     
 }
 
-bool EventLoop::isloopInthisThread() const {return threadId_ == std::this_thread::get_id();}; //can't reverse
+bool EventLoop::isloopInthisThread() const {
+    return threadId_ == std::this_thread::get_id();
+}; //can't reverse
 
 void EventLoop::quit() { quit_ = true;};
 
@@ -72,9 +74,7 @@ int EventLoop::createEventFd() {
 
 void EventLoop::wakeup() { //where should i read?
     uint64_t spOffer = 1;
-    //std::cout << "EventLoop::wakeupFd_ :" << wakeupFd_ << std::endl; 
-    ssize_t n = writen(wakeupFd_, &spOffer, sizeof spOffer); //figure out what's going on
-    //std::cout << n << std::endl;
+    ssize_t n = writen(wakeupFd_, &spOffer, sizeof spOffer);
 }
 
 void EventLoop::handleRead() {
@@ -95,14 +95,18 @@ void EventLoop::doPendingFunctors() {
     callingPendingFunctors_ = false;
 }
 
-void EventLoop::addtoPoller(std::shared_ptr<Channel> channel, int timeout) {
-    epoller_->epoll_add(channel, timeout);
+void EventLoop::addtoPoller(std::shared_ptr<Channel> channel) {
+    epoller_->epoll_add(channel);
 }
 
-void EventLoop::updatePoller(std::shared_ptr<Channel> channel, int timeout) {
-    epoller_->epoll_mod(channel, timeout);
+void EventLoop::updatePoller(std::shared_ptr<Channel> channel) {
+    epoller_->epoll_mod(channel);
 }
 
 void EventLoop::removeFromPoller(std::shared_ptr<Channel> channel) {
     epoller_->epoll_del(channel);
+}
+
+void EventLoop::handleExpired() { 
+    timerManager_.handleExpiredEvent();
 }

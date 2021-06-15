@@ -6,7 +6,6 @@
 #include <netinet/in.h>
 #include <string.h>
 #include "EventLoopThreadPool.h"
-#include "HttpConn.h"
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -24,6 +23,7 @@ TcpServer::TcpServer(EventLoop* loop, int threadnum, int port)
         //acceptChannel_(std::move(new Channel(loop_, listenFd_))); //wrong,
         acceptChannel_ = std::make_shared<Channel>(loop_, listenFd_); //behind setsocketnonblocking
         //std::cout << "listeningFd: " << listenFd_ << std::endl;
+        handle_for_sigpipe(); //avoid Ksoftirqd 3, not worked
     }
 
 TcpServer::~TcpServer() {}
@@ -49,20 +49,14 @@ void TcpServer::handleConnection() { //send work to channel
         if(setSocketNonBlocking(acceptFd) < 0) {
             //deal bad syscall
         }
-        /*
-        if(acceptFd >= 10000) {
-            close(acceptFd);
-            continue;
-        }
-        */
         setSocketNodelay(acceptFd);
         std::shared_ptr<HttpConn> httpconn(new HttpConn(subLoop, acceptFd));
-        subLoop->runInLoop(std::bind(&HttpConn::tie, httpconn));
         subLoop->runInLoop(std::bind(&Epoll::setHttpConn, subLoop->epoller_, httpconn, acceptFd)); //avoid HttpConn distruct
         //subLoop->epoller_->setHttpConn(httpconn, acceptFd);
         subLoop->runInLoop(std::bind(&HttpConn::handleNewEvents, httpconn)); //set conn task in channel
     }
     if(errno == EMFILE) {
+        //std::cout << "hahah" << std::endl;
         close(idleFd_);
         idleFd_ = accept(listenFd_, (struct sockaddr*)&clientAddr, &clientAddrLen);
         close(idleFd_);

@@ -7,6 +7,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 
 
 const int MAX_BUFF = 4096;
@@ -187,8 +188,7 @@ int socket_bind_listen(int port) {
 
   // 消除bind时"Address already in use"错误
   int optval = 1;
-  if (setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &optval,
-                 sizeof(optval)) == -1) {
+  if (setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1) {
     close(listen_fd);
     return -1;
   }
@@ -197,7 +197,8 @@ int socket_bind_listen(int port) {
   struct sockaddr_in server_addr;
   bzero((char *)&server_addr, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
-  server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  //server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  server_addr.sin_addr.s_addr = inet_addr(INADDR_ANY);
   server_addr.sin_port = htons((unsigned short)port);
   if (bind(listen_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) ==
       -1) {

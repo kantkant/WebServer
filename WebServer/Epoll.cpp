@@ -22,28 +22,19 @@ std::vector<std::shared_ptr<Channel>> Epoll::poll() {
     return activechannel_;
 }
 
-void Epoll::epoll_add(std::shared_ptr<Channel> channel, int timeout) {
-    if(timeout > 0) {
-        addTimer(channel, timeout);
-    }
+void Epoll::epoll_add(std::shared_ptr<Channel> channel) {
     int fd = channel->getFd();
     fd2chan_[fd] = channel; //connect fd-channel
     struct epoll_event event;
     event.data.fd = fd;
     event.events = channel->getEvents();
-    //event.events = EPOLLIN|EPOLLET;
     epoll_ctl(epollfd_, EPOLL_CTL_ADD, fd, &event);
-    //std::cout << "epoll_ctl: " <<epoll_ctl(epollfd_, EPOLL_CTL_ADD, fd, &event) << channel->getFd() << std::endl;
 }
 
-void Epoll::epoll_mod(std::shared_ptr<Channel> channel, int timeout) {
-    if(timeout > 0) {
-        addTimer(channel, timeout);
-    }
+void Epoll::epoll_mod(std::shared_ptr<Channel> channel) {
     int fd = channel->getFd();
     struct epoll_event event;
     event.data.fd = fd;
-    //event.events = EPOLLIN|EPOLLET;
     event.events = channel->getEvents();
     epoll_ctl(epollfd_, EPOLL_CTL_MOD, fd, &event);
 }
@@ -67,18 +58,3 @@ std::shared_ptr<Channel> Epoll::getChannel(int fd) {
 void Epoll::setHttpConn(std::shared_ptr<HttpConn> httpconn, int fd) {
     fd2http_[fd] = httpconn;
 }
-
-void Epoll::addTimer(std::shared_ptr<Channel> channel, int timeout) {
-    std::shared_ptr<HttpConn> httpconn = channel->getHolder();
-    if(httpconn) {
-        timerManager_.addTimer(httpconn, timeout);
-    }
-    else {
-        //bad httpconn;
-    }
-}
-
-void Epoll::handleExpired() { 
-    timerManager_.handleExpiredEvent();
-}
-

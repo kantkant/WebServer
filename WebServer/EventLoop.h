@@ -9,6 +9,7 @@
 #include "Condition.h"
 #include <sys/eventfd.h>
 #include <functional>
+#include "Timer.h"
 
 class Epoll; //fix bug
 class Channel; //fix bug
@@ -22,14 +23,15 @@ public:
     void quit();
     void runInLoop(funcCallback&& cb);
     void doPendingFunctors();
-    void addtoPoller(std::shared_ptr<Channel> channel, int timeout = 0);
-    void updatePoller(std::shared_ptr<Channel> channel, int timeout = 0);
+    void addtoPoller(std::shared_ptr<Channel> channel);
+    void updatePoller(std::shared_ptr<Channel> channel);
     void removeFromPoller(std::shared_ptr<Channel> channel);
+    void queueInLoop(funcCallback&& cb);
+    void handleExpired();
 private:
     bool isloopInthisThread() const;
     void handleRead();
     void wakeup();
-    void queueInLoop(funcCallback&& cb);
     int createEventFd();
     int wakeupFd_;
     const std::thread::id threadId_;
@@ -39,6 +41,7 @@ private:
     std::vector<funcCallback> pendingfunctors_;
     bool callingPendingFunctors_;
     std::shared_ptr<Channel> wakeupChannel_;
+    TimerManager timerManager_;
 public:
     std::shared_ptr<Epoll> epoller_;
 };
