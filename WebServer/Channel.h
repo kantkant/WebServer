@@ -32,6 +32,7 @@ public:
     void handleEvents(TimerManager timerManager);
     void handleClose();
     void handleTimer(TimerManager timerManager);
+    void addTimer();
     void linkTimer(std::shared_ptr<TimerNode> timernode);
     void untieTimer();
 public:

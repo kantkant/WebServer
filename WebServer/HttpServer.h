@@ -13,14 +13,14 @@ public:
     HttpServer();
     ~HttpServer();
     void writeCompleteCallback();
-    void readCallback(std::string &inbuffer);
+    void messageCallback(std::string &inbuffer_, std::string &outBuffer_);
     void closeCallback();
     void errorCallback(int fd, int errorcode, std::string &errormsg);
     void connectionCallback(std::shared_ptr<HttpConn> httpconn);
 private:
     std::weak_ptr<HttpConn> httpConn_;
-    std::string receiveData;
-    std::string sendData;
+    std::string receiveData_;
+    std::string sendData_;
 };
 
 

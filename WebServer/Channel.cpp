@@ -2,13 +2,11 @@
 #include <iostream>
 #include <memory>
 
-
-
 Channel::Channel(EventLoop* loop, int fd)
     :loop_(loop),
      fd_(fd),
      events_(0),
-     expiredTime_(0) {}
+     expiredTime_(500000) {}
 
 Channel::Channel(EventLoop* loop)
     :loop_(loop),
@@ -71,21 +69,25 @@ void Channel::setFd(int fd) { fd_ = fd; }
 int Channel::getFd() { return fd_; }
 
 void Channel::handleEvents(TimerManager timerManager) {
-    if(holder_.lock()) {
+    if(timer_.lock()) {
         handleTimer(timerManager);
     }
     if(events_ & EPOLLHUP && !(events_ & EPOLLIN) && closecallback_) {  //&'s priority is higher then &&
         handleClose(); 
     }
-    if(events_ & EPOLLERR && errorcallback_) {
+    else if(events_ & EPOLLERR && errorcallback_) {
         handleError();
     }
-    if(events_ & (EPOLLIN | EPOLLPRI | EPOLLRDHUP) && readcallback_) {
+    else if(events_ & (EPOLLIN | EPOLLPRI | EPOLLRDHUP) && readcallback_) {
         handleRead();
     }
-    if(events_ & EPOLLOUT && writecallback_) {
+    else if(events_ & EPOLLOUT && writecallback_) {
         handleWrite();
     }
+}
+
+void Channel::addTimer() {
+    loop_->addTimer(shared_from_this(), expiredTime_);
 }
 
 void Channel::handleTimer(TimerManager timerManager) {

@@ -12,13 +12,15 @@
 HttpServer::HttpServer() {}
 HttpServer::~HttpServer() {}
 
-void HttpServer::readCallback(std::string &inbuffer) {
-    receiveData = inbuffer;
-    if(receiveData.size() > 0) {
+void HttpServer::messageCallback(std::string &inbuffer, std::string &outBuffer_) { //how to deal with data?
+    receiveData_ += inbuffer;
+    if(receiveData_.size() > 0) {
         std::cout << inbuffer << std::endl;
         if(httpConn_.lock()) {
             httpConn_.lock()->enableWriting();
         }
+        outBuffer_ = receiveData_;
+        receiveData_.clear();
     }
 }
 
