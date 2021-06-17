@@ -28,11 +28,11 @@ struct TimerCmp {
 };
 
 class TimerManager {
+private:
+  std::priority_queue<std::shared_ptr<TimerNode>, std::deque<std::shared_ptr<TimerNode>>, TimerCmp> timerNodeQueue;
 public:
   TimerManager();
   ~TimerManager();
   void addTimer(std::shared_ptr<Channel> channel, int timeout);
   void handleExpiredEvent();
-private:
-  std::priority_queue<std::shared_ptr<TimerNode>, std::deque<std::shared_ptr<TimerNode>>, TimerCmp> timerNodeQueue;
 };

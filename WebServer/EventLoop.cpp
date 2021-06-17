@@ -29,6 +29,7 @@ void EventLoop::loop() {
     while(!quit_) {
         std::vector<std::shared_ptr<Channel>> activechannel_;
         activechannel_ = epoller_->poll();
+        //std::cout << "polling" << std::endl;
         for(auto& it : activechannel_) {
             it->handleEvents(timerManager_);
         }
@@ -109,4 +110,9 @@ void EventLoop::removeFromPoller(std::shared_ptr<Channel> channel) {
 
 void EventLoop::handleExpired() { 
     timerManager_.handleExpiredEvent();
+}
+
+void EventLoop::addTimer(std::shared_ptr<Channel> channel, int TIMEOUT) {
+    timerManager_.addTimer(channel, TIMEOUT);
+
 }

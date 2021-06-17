@@ -28,6 +28,7 @@ public:
     void removeFromPoller(std::shared_ptr<Channel> channel);
     void queueInLoop(funcCallback&& cb);
     void handleExpired();
+    void addTimer(std::shared_ptr<Channel> channel, int TIMEOUT);
 private:
     bool isloopInthisThread() const;
     void handleRead();
