@@ -14,7 +14,7 @@ Epoll::~Epoll() {}
 std::vector<std::shared_ptr<Channel>> Epoll::poll() {
     std::vector<std::shared_ptr<Channel>> activechannel_;
     //std::cout << "poller : polling" << std::endl;
-    int event_nums = epoll_wait(epollfd_, &*events_.begin(), events_.size(), -1);
+    int event_nums = epoll_wait(epollfd_, &*events_.begin(), events_.size(), TIMEOUT);
     for(int i = 0; i < event_nums; ++i) {
         int fd = events_[i].data.fd;
         activechannel_.push_back(fd2chan_[fd]);

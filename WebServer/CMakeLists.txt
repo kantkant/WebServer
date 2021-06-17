@@ -32,5 +32,6 @@ add_executable(${PROJECT_NAME}
 	Timer.h
 	Timer.cpp
 	HttpServer.h
+	HttpServer.cpp
 )
 target_link_libraries(${PROJECT_NAME} -lpthread)
