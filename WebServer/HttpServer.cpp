@@ -9,8 +9,8 @@
 #include <sys/mman.h>
 
 
-HttpServer::HttpServer() {}
-HttpServer::~HttpServer() {}
+HttpServer::HttpServer() {}//{std::cout << "httpServer construct" << std::endl;}
+HttpServer::~HttpServer() {}//{std::cout << "httpServer distruct" << std::endl;}
 
 void HttpServer::messageCallback(std::string &inbuffer, std::string &outBuffer_) { //how to deal with data?
     receiveData_ += inbuffer;
@@ -25,18 +25,24 @@ void HttpServer::messageCallback(std::string &inbuffer, std::string &outBuffer_)
 }
 
 void HttpServer::writeCompleteCallback() {
-    std::cout << "writeComplete" << std::endl;
+    //std::cout << "writeComplete" << std::endl;
     if(httpConn_.lock()) {
         httpConn_.lock()->enableReading();
+        //httpConn_.lock()->connectionState_ = H_DISCONNECTING;
+        //httpConn_.lock()->handleClose();
     }
+
 }
 
 void HttpServer::connectionCallback(std::shared_ptr<HttpConn> httpconn) {
     httpConn_ = httpconn;
 }
-void HttpServer::closeCallback() {}
+void HttpServer::closeCallback() {
 
-void errorCallback(int fd, int errorcode, std::string &errormsg) {}
+}
+
+void HttpServer::errorCallback(int fd, int errorcode, std::string &errormsg) {}
+
 /*
 const int DEFAULT_EXPIRED_TIME = 1; //2s telnet default shortConn
 const int DEFAULT_KEEP_ALIVE_TIME = 5 * 60 * 1000; //30s  browser defalut keep-alive

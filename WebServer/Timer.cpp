@@ -12,9 +12,9 @@ TimerNode::TimerNode(std::shared_ptr<Channel> channel, int timeout)
     }
 
 TimerNode::~TimerNode() {
-    if(channel_) {
+    if(channel_.lock()) {
       std::cout << "close" << std::endl;
-      channel_->handleClose();
+      channel_.lock()->handleClose();
     }
 }
 
@@ -60,8 +60,7 @@ TimerManager::~TimerManager() {}
 
 void TimerManager::addTimer(std::shared_ptr<Channel> channel, int timeout) {
   std::shared_ptr<TimerNode> new_node(new TimerNode(channel, timeout));
-    std::cout << "wow" << std::endl;
-  timerNodeQueue.push(new_node);
+  timerNodeQueue.push(std::move(new_node));
   channel->linkTimer(new_node);
 }
 

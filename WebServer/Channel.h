@@ -35,6 +35,8 @@ public:
     void addTimer();
     void linkTimer(std::shared_ptr<TimerNode> timernode);
     void untieTimer();
+    void setExpTime(int timeout);
+    int getExpTime() const;
 public:
     void setEvents(__uint32_t events);
     __uint32_t getEvents();

@@ -18,7 +18,7 @@ public:
 private:
     size_t expTime_;
     bool isDeleted_;
-    std::shared_ptr<Channel> channel_;
+    std::weak_ptr<Channel> channel_;  //must be weak_ptr
 };
 
 struct TimerCmp {

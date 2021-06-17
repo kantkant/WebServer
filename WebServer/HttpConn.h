@@ -28,6 +28,8 @@ private:
     std::string outBuffer_;
     std::shared_ptr<Channel> channel_;
     EventLoop* loop_;
+public:
     ConnectionState connectionState_;
+private:
     std::shared_ptr<HttpServer> httpServer_;
 };

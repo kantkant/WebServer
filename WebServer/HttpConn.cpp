@@ -16,10 +16,10 @@ HttpConn::HttpConn(EventLoop* loop, int fd)
          channel_->setReadcallback(std::bind(&HttpConn::handleRead, this));
          channel_->setWritecallback(std::bind(&HttpConn::handleWrite, this));
          channel_->setCloseCallBack(std::bind(&HttpConn::handleClose, this));
-         std::cout << "httpConn construct" << std::endl;
+         //std::cout << "httpConn construct" << std::endl;
     }
 
-HttpConn::~HttpConn() { std::cout << "httpConn distruct" << std::endl;}
+HttpConn::~HttpConn() {}//{ std::cout << "httpConn distruct" << std::endl;}
 
 void HttpConn::enableWriting() {
     channel_->setEvents(EPOLLOUT | EPOLLET);
@@ -34,8 +34,8 @@ void HttpConn::enableReading() {
 void HttpConn::handleRead() {
     ssize_t n = readn(channel_->getFd(), inBuffer_); //let channel get fd;
     if(n > 0) {
-        loop_->queueInLoop(std::bind(&HttpServer::messageCallback, httpServer_, inBuffer_, outBuffer_)); //set TIME_OUT for one conn
-    }
+        loop_->queueInLoop(std::bind(&HttpServer::messageCallback, httpServer_, ref(inBuffer_), ref(outBuffer_))); //set TIME_OUT for one conn
+    }   //use ref() as reference
     else if(n == 0) {
         handleClose();
     }
@@ -44,7 +44,7 @@ void HttpConn::handleRead() {
     }
 }
 
-void HttpConn::handleWrite() {
+void HttpConn::handleWrite() { //care about buffer free
     int outBufSize = outBuffer_.size();
     ssize_t n = writen(channel_->getFd(), outBuffer_);
     if(n > 0 && n == outBufSize) {
@@ -60,15 +60,15 @@ void HttpConn::handleWrite() {
 
 void HttpConn::handleNewEvents() {
     connectionState_ = H_CONNECTED;
+    loop_->addTimer(channel_, channel_->getExpTime());
     channel_->setHolder(shared_from_this());
     channel_->setEvents(EPOLLIN | EPOLLET);
     loop_->addtoPoller(channel_);
     loop_->queueInLoop(std::bind(&HttpServer::connectionCallback, httpServer_, shared_from_this()));
-    channel_->addTimer();
-    //loop_->queueInLoop(std::bind(&Channel::addTimer, channel_));
 }
 
 void HttpConn::handleClose() {
+    if(connectionState_ == H_DISCONNECTING)
     connectionState_ = H_DISCONNECTED;
     std::shared_ptr<HttpConn> guard(shared_from_this());
     channel_->untieTimer();
