@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(WebServer CXX)
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_FLAGS -std=c++11)
 set(HEADERS *.h)
 set(SOURCES *.cpp)
 add_executable(${PROJECT_NAME}
