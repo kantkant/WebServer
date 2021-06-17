@@ -1,4 +1,3 @@
-/*
 #include "HttpConn.h"
 #include "Util.h"
 #include <sys/types.h>
@@ -9,6 +8,34 @@
 #include <cstring>
 #include <sys/mman.h>
 
+
+HttpServer::HttpServer() {}
+HttpServer::~HttpServer() {}
+
+void HttpServer::readCallback(std::string &inbuffer) {
+    receiveData = inbuffer;
+    if(receiveData.size() > 0) {
+        std::cout << inbuffer << std::endl;
+        if(httpConn_.lock()) {
+            httpConn_.lock()->enableWriting();
+        }
+    }
+}
+
+void HttpServer::writeCompleteCallback() {
+    std::cout << "writeComplete" << std::endl;
+    if(httpConn_.lock()) {
+        httpConn_.lock()->enableReading();
+    }
+}
+
+void HttpServer::connectionCallback(std::shared_ptr<HttpConn> httpconn) {
+    httpConn_ = httpconn;
+}
+void HttpServer::closeCallback() {}
+
+void errorCallback(int fd, int errorcode, std::string &errormsg) {}
+/*
 const int DEFAULT_EXPIRED_TIME = 1; //2s telnet default shortConn
 const int DEFAULT_KEEP_ALIVE_TIME = 5 * 60 * 1000; //30s  browser defalut keep-alive
 

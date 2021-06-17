@@ -15,39 +15,14 @@ public:
     void writeCompleteCallback();
     void readCallback(std::string &inbuffer);
     void closeCallback();
-    void errorCallback(int fd, int errorcode, std::string errormsg);
+    void errorCallback(int fd, int errorcode, std::string &errormsg);
     void connectionCallback(std::shared_ptr<HttpConn> httpconn);
+private:
     std::weak_ptr<HttpConn> httpConn_;
     std::string receiveData;
     std::string sendData;
 };
 
-HttpServer::HttpServer() {}
-HttpServer::~HttpServer() {}
-
-void HttpServer::readCallback(std::string &inbuffer) {
-    receiveData = inbuffer;
-    if(receiveData.size() > 0) {
-        std::cout << inbuffer << std::endl;
-        if(httpConn_.lock()) {
-            httpConn_.lock()->enableWriting();
-        }
-    }
-}
-
-void HttpServer::writeCompleteCallback() {
-    std::cout << "writeComplete" << std::endl;
-    if(httpConn_.lock()) {
-        httpConn_.lock()->enableReading();
-    }
-}
-
-void HttpServer::connectionCallback(std::shared_ptr<HttpConn> httpconn) {
-    httpConn_ = httpconn;
-}
-void HttpServer::closeCallback() {}
-
-void errorCallback(int fd, int errorcode, std::string errormsg) {}
 
 
 /*

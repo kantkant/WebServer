@@ -71,7 +71,9 @@ void Channel::setFd(int fd) { fd_ = fd; }
 int Channel::getFd() { return fd_; }
 
 void Channel::handleEvents(TimerManager timerManager) {
-    handleTimer(timerManager);
+    if(holder_.lock()) {
+        handleTimer(timerManager);
+    }
     if(events_ & EPOLLHUP && !(events_ & EPOLLIN) && closecallback_) {  //&'s priority is higher then &&
         handleClose(); 
     }
@@ -87,7 +89,7 @@ void Channel::handleEvents(TimerManager timerManager) {
 }
 
 void Channel::handleTimer(TimerManager timerManager) {
-    untieTimer(); //priority can't support "find"
+    untieTimer(); //priority queue can't support "find"
     std::shared_ptr<HttpConn> httpconn = getHolder();
     if(httpconn) {
         timerManager.addTimer(shared_from_this(), expiredTime_);
