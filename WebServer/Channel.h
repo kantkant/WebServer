@@ -14,12 +14,6 @@ class HttpConn;
 class Channel : noncopyable ,public std::enable_shared_from_this<Channel> { //C++11
 private:
     typedef std::function<void()> CallBack; //fix bug.should ahead of class
-/*
-public:
-    void updatePoller(std::shared_ptr<Channel> channel);
-    void addtoPoller(std::shared_ptr<Channel> channel);
-    void removeFromPoller(std::shared_ptr<Channel> channel);
-*/
 public:
     Channel(EventLoop* loop, int fd);
     Channel(EventLoop* loop);
@@ -35,13 +29,14 @@ public:
     void handleWrite();
     void handleError();
     void handleConn();
-    void handleEvents();
+    void handleEvents(TimerManager timerManager);
     void handleClose();
+    void handleTimer(TimerManager timerManager);
+    void linkTimer(std::shared_ptr<TimerNode> timernode);
+    void untieTimer();
 public:
     void setEvents(__uint32_t events);
     __uint32_t getEvents();
-    //void setlastEvents(__uint32_t event); //abandon, it's not a reference
-    //__uint32_t getlastEvents();
 public:
     void setHolder(std::shared_ptr<HttpConn> httpconn);
     std::shared_ptr<HttpConn> getHolder();
@@ -51,7 +46,6 @@ public:
     
 private:
     __uint32_t events_;
-    //__uint32_t lastevents_;
     EventLoop* loop_;
     int fd_;
     std::weak_ptr<HttpConn> holder_;
@@ -60,4 +54,6 @@ private:
     CallBack errorcallback_;
     CallBack conncallback_; //work?
     CallBack closecallback_;
+    int expiredTime_;
+    std::weak_ptr<TimerNode> timer_;
 };
