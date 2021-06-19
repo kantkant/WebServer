@@ -9,13 +9,15 @@ TimerNode::TimerNode(std::shared_ptr<Channel> channel, int timeout)
         struct timeval now; //ms
         gettimeofday(&now, nullptr);
         expTime_  = (((now.tv_sec % 10000) * 1000) + (now.tv_usec / 1000)) + timeout;
+        //std::cout << "Timer construct" << std::endl;
     }
 
 TimerNode::~TimerNode() {
     if(channel_.lock()) {
-      std::cout << "close" << std::endl;
+      //std::cout << "close" << std::endl;
       channel_.lock()->handleClose();
     }
+    //std::cout << "Timer distruct" << std::endl;
 }
 
 void TimerNode::update(int timeout) {
@@ -42,6 +44,7 @@ size_t TimerNode::getExpTime() {
 }
 
 void TimerNode::setDeleted() {
+  //std::cout << "setDelete" << std::endl;
   isDeleted_ = true;
 }
 
@@ -60,18 +63,19 @@ TimerManager::~TimerManager() {}
 
 void TimerManager::addTimer(std::shared_ptr<Channel> channel, int timeout) {
   std::shared_ptr<TimerNode> new_node(new TimerNode(channel, timeout));
-  timerNodeQueue.push(std::move(new_node));
+  timerNodeQueue.push(new_node);
   channel->linkTimer(new_node);
 }
 
 void TimerManager::handleExpiredEvent() {
   while (!timerNodeQueue.empty()) {
     std::shared_ptr<TimerNode> ptimer_now = timerNodeQueue.top();
+    //std::cout << ptimer_now << timerNodeQueue.size() << std::endl;
     if(ptimer_now->isDeleted()) {
-        timerNodeQueue.pop();
+      timerNodeQueue.pop();
     }
-    else if(ptimer_now->isValid() == false) {
-        timerNodeQueue.pop();
+    else if(!ptimer_now->isValid()) {
+      timerNodeQueue.pop();
     }
     else {
       break;

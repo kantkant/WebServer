@@ -33,8 +33,8 @@ void EventLoop::loop() {
         for(auto& it : activechannel_) {
             it->handleEvents(timerManager_);
         }
+        handleExpired(); //will not timeout when reading or writing
         doPendingFunctors();
-        handleExpired();
     }     
 }
 
@@ -114,5 +114,4 @@ void EventLoop::handleExpired() {
 
 void EventLoop::addTimer(std::shared_ptr<Channel> channel, int TIMEOUT) {
     timerManager_.addTimer(channel, TIMEOUT);
-
 }

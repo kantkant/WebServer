@@ -23,6 +23,7 @@ public:
     void handleNewEvents();
     void enableWriting();
     void enableReading();
+    void setExpTime(int timeout);
 private:
     std::string inBuffer_;
     std::string outBuffer_;
