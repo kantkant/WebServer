@@ -7,25 +7,6 @@
 #include <unordered_map>
 #include "HttpConn.h"
 
-
-class HttpServer {
-public:
-    HttpServer();
-    ~HttpServer();
-    void writeCompleteCallback();
-    void messageCallback(std::string &inbuffer_, std::string &outBuffer_);
-    void closeCallback();
-    void errorCallback(int fd, int errorcode, std::string &errormsg);
-    void connectionCallback(std::shared_ptr<HttpConn> httpconn);
-private:
-    std::weak_ptr<HttpConn> httpConn_;
-    std::string receiveData_;
-    std::string sendData_;
-};
-
-
-
-/*
 enum ProcessState {
   STATE_PARSE_URI = 1,      //method:post,get,head -> uri:file path ->http version:1.0,1.1 
   STATE_PARSE_HEADERS,      //keepalive only
@@ -50,8 +31,6 @@ enum AnalysisState {
     ANALYSIS_SUCCESS = 1,
     ANALYSIS_ERROR
 };
-
-
 
 enum HttpMethod {
     METHOD_POST = 1,
@@ -88,15 +67,44 @@ public:
 private:
     static pthread_once_t once_control;
 };
-class HttpServer {
+
+class HttpServer : noncopyable {
 public:
+    HttpServer();
+    ~HttpServer();
     void writeCompleteCallback();
-    void readCallback(std::string &inbuffer);
-    void closeCallback(std::shared_ptr<HttpConn> httpconn);
-    void errorCallback(int fd, int errorcode, std::string errormsg);
-    void connectionCallback();
+    void messageCallback(std::string &inbuffer, std::string &outBuffer);
+    void closeCallback();
+    void handleError(std::string errormsg = "Bad Request", int errorcode = 400);
+    void connectionCallback(std::shared_ptr<HttpConn> httpconn);
+    void httpAnalysisRequest();
+    URIState parseURI();
+    HeaderState parseHeaders();
+    AnalysisState analysisRequest();
+    void analysisReset();
+private:
+    int nowReadPos_;
+    ParseState hState_;
+    std::weak_ptr<HttpConn> httpConn_;
+    std::string bufferData_; //inbuffer && outbuffer
+    ProcessState state_;
+    HttpMethod method_;
+    std::map<std::string, std::string> headers_;
+    bool keepAlive_;
+    std::string resourceName_;
+    HttpVersion HTTPVersion_;
+    bool isReadAgain_;
+    /*
+private:
+    static std::map<std::string, std::string> initResources();
+    static pthread_once_t once_control;
+    static std::map<std::string, std::string> resources_;
+public:
+    static std::string getMime(const std::string &suffix);
+    */
 };
 
+/*
 class HttpConn : noncopyable, public std::enable_shared_from_this<HttpConn> {
 public:
     HttpConn(EventLoop* loop, int fd);

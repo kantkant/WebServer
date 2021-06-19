@@ -6,7 +6,7 @@ Channel::Channel(EventLoop* loop, int fd)
     :loop_(loop),
      fd_(fd),
      events_(0),
-     expiredTime_(500000) {}//{std::cout << "Channel construct" << std::endl;}
+     expiredTime_(5*60*1000) {}//std::cout << "Channel construct" << std::endl;}
 
 Channel::Channel(EventLoop* loop)
     :loop_(loop),
@@ -18,15 +18,15 @@ Channel::~Channel() {
     //std::cout << "Channel distruct" << std::endl;
 }
 
-void Channel::setReadcallback(CallBack&& cb) { readcallback_ = std::move(cb); }
+void Channel::setReadcallback(callBack&& cb) { readcallback_ = std::move(cb); }
 
-void Channel::setWritecallback(CallBack&& cb) { writecallback_ = std::move(cb); }
+void Channel::setWritecallback(callBack&& cb) { writecallback_ = std::move(cb); }
 
-void Channel::setConncallback(CallBack&& cb) { conncallback_ = std::move(cb); }
+void Channel::setConncallback(callBack&& cb) { conncallback_ = std::move(cb); }
 
-void Channel::setErrorcallback(CallBack&& cb) { errorcallback_ = std::move(cb); }
+void Channel::setErrorcallback(callBack&& cb) { errorcallback_ = std::move(cb); }
 
-void Channel::setCloseCallBack(CallBack&& cb) { closecallback_ = std::move(cb); } //extra option, may not work
+void Channel::setCloseCallBack(callBack&& cb) { closecallback_ = std::move(cb); } //extra option, may not work
 
 void Channel::handleRead() {
     if(readcallback_) {
@@ -69,8 +69,9 @@ void Channel::setFd(int fd) { fd_ = fd; }
 
 int Channel::getFd() { return fd_; }
 
-void Channel::handleEvents(TimerManager timerManager) {
+void Channel::handleEvents(TimerManager &timerManager) {
     if(timer_.lock()) {
+        //std::cout << "handleTimer" << std::endl;
         handleTimer(timerManager);
     }
     if(events_ & EPOLLHUP && !(events_ & EPOLLIN) && closecallback_) {  //&'s priority is higher then &&
@@ -87,7 +88,7 @@ void Channel::handleEvents(TimerManager timerManager) {
     }
 }
 
-void Channel::handleTimer(TimerManager timerManager) {
+void Channel::handleTimer(TimerManager &timerManager) {
     untieTimer(); //priority queue can't support "find"
     std::shared_ptr<HttpConn> httpconn = getHolder();
     if(httpconn) {
@@ -99,14 +100,18 @@ void Channel::handleTimer(TimerManager timerManager) {
 }
 
 void Channel::linkTimer(std::shared_ptr<TimerNode> timernode) {
+    //std::cout << timernode.use_count() << std::endl;
     timer_ = timernode;
+    //std::cout << timer_.lock().use_count() << std::endl;
 }
 
 void Channel::untieTimer() {
     if(timer_.lock()) {
+        //std::cout << "untie" << std::endl;
         std::shared_ptr<TimerNode> my_timer(timer_.lock());
         my_timer->clearReq();
         timer_.reset();
+        //std::cout << timer_.lock() << std::endl;
     }
 }
 

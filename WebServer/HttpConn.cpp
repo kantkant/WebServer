@@ -7,6 +7,9 @@
 #include <fcntl.h>
 #include <cstring>
 #include <sys/mman.h>
+#include "HttpServer.h"
+
+
 
 HttpConn::HttpConn(EventLoop* loop, int fd)
     :loop_(loop),
@@ -19,7 +22,8 @@ HttpConn::HttpConn(EventLoop* loop, int fd)
          //std::cout << "httpConn construct" << std::endl;
     }
 
-HttpConn::~HttpConn() {}//{ std::cout << "httpConn distruct" << std::endl;}
+HttpConn::~HttpConn() {} //std::cout << "httpConn distruct" << std::endl;}
+
 
 void HttpConn::enableWriting() {
     channel_->setEvents(EPOLLOUT | EPOLLET);
@@ -34,7 +38,7 @@ void HttpConn::enableReading() {
 void HttpConn::handleRead() {
     ssize_t n = readn(channel_->getFd(), inBuffer_); //let channel get fd;
     if(n > 0) {
-        loop_->queueInLoop(std::bind(&HttpServer::messageCallback, httpServer_, ref(inBuffer_), ref(outBuffer_))); //set TIME_OUT for one conn
+        httpServer_->messageCallback(inBuffer_, outBuffer_); //set TIME_OUT for one conn
     }   //use ref() as reference
     else if(n == 0) {
         handleClose();
@@ -47,35 +51,48 @@ void HttpConn::handleRead() {
 void HttpConn::handleWrite() { //care about buffer free
     int outBufSize = outBuffer_.size();
     ssize_t n = writen(channel_->getFd(), outBuffer_);
-    if(n > 0 && n == outBufSize) {
-        loop_->queueInLoop(std::bind(&HttpServer::writeCompleteCallback, httpServer_));
+    //std::cout << "write" << std::endl;
+    if(n > 0 && n == outBufSize && connectionState_ != H_DISCONNECTING) {
+        httpServer_->writeCompleteCallback();  //watch out !!!!! 6/18
+        return;
     }
-    if(n > 0 && connectionState_ == H_DISCONNECTING) {
-        shutdown(channel_->getFd(), SHUT_WR);
+    //if(n > 0 && n < outBufSize && connectionState_ == H_DISCONNECTING) {}
+    if(n > 0 && n == outBufSize && connectionState_ == H_DISCONNECTING) {
+        handleClose();
     }
     if(n <= 0) {
         //bad syscall
+        handleError();
     }
 }
 
 void HttpConn::handleNewEvents() {
     connectionState_ = H_CONNECTED;
-    loop_->addTimer(channel_, channel_->getExpTime());
     channel_->setHolder(shared_from_this());
     channel_->setEvents(EPOLLIN | EPOLLET);
     loop_->addtoPoller(channel_);
-    loop_->queueInLoop(std::bind(&HttpServer::connectionCallback, httpServer_, shared_from_this()));
+    httpServer_->connectionCallback(shared_from_this());
+    loop_->addTimer(channel_, channel_->getExpTime());
 }
 
 void HttpConn::handleClose() {
-    if(connectionState_ == H_DISCONNECTING)
+    shutdown(channel_->getFd(), SHUT_WR);
     connectionState_ = H_DISCONNECTED;
     std::shared_ptr<HttpConn> guard(shared_from_this());
     channel_->untieTimer();
     loop_->queueInLoop(std::bind(&EventLoop::removeFromPoller, loop_, channel_));
-    loop_->queueInLoop(std::bind(&HttpServer::closeCallback, httpServer_));
+    httpServer_->closeCallback();
+    //shutdown(channel_->getFd(), SHUT_WR);
 }
 
-void HttpConn::handleError() {
+void HttpConn::handleError() { //return 400 request
     //std::cout << channel-getFd() << std::endl;
+    connectionState_ = H_DISCONNECTING;
+    //conn->server : server->conn;
+    
+    //send in outBuffer_
+}
+
+void HttpConn::setExpTime(int timeout) {
+    channel_->setExpTime(timeout);
 }

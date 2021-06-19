@@ -13,25 +13,25 @@ class HttpConn;
 
 class Channel : noncopyable ,public std::enable_shared_from_this<Channel> { //C++11
 private:
-    typedef std::function<void()> CallBack; //fix bug.should ahead of class
+    typedef std::function<void()> callBack; //fix bug.should ahead of class
 public:
     Channel(EventLoop* loop, int fd);
     Channel(EventLoop* loop);
     ~Channel();
 public:
-    void setReadcallback(CallBack&& cb);
-    void setWritecallback(CallBack&& cb);
-    void setErrorcallback(CallBack&& cb);
-    void setConncallback(CallBack&& cb);
-    void setCloseCallBack(CallBack&& cb); //attention on this one
+    void setReadcallback(callBack&& cb);
+    void setWritecallback(callBack&& cb);
+    void setErrorcallback(callBack&& cb);
+    void setConncallback(callBack&& cb);
+    void setCloseCallBack(callBack&& cb); //attention on this one
 public:
     void handleRead();
     void handleWrite();
     void handleError();
     void handleConn();
-    void handleEvents(TimerManager timerManager);
+    void handleEvents(TimerManager &timerManager);
     void handleClose();
-    void handleTimer(TimerManager timerManager);
+    void handleTimer(TimerManager &timerManager);
     void addTimer();
     void linkTimer(std::shared_ptr<TimerNode> timernode);
     void untieTimer();
@@ -52,11 +52,11 @@ private:
     EventLoop* loop_;
     int fd_;
     std::weak_ptr<HttpConn> holder_;
-    CallBack readcallback_;
-    CallBack writecallback_;
-    CallBack errorcallback_;
-    CallBack conncallback_; //work?
-    CallBack closecallback_;
+    callBack readcallback_;
+    callBack writecallback_;
+    callBack errorcallback_;
+    callBack conncallback_; //work?
+    callBack closecallback_;
     int expiredTime_;
     std::weak_ptr<TimerNode> timer_;
 };
