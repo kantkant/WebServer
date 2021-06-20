@@ -160,9 +160,10 @@ int setSocketNonBlocking(int fd) {
   return 0;
 }
 
-void setSocketNodelay(int fd) {
+void setSocketNodelayBytes(int fd, int sendbuf) {
   int enable = 1;
   setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (void *)&enable, sizeof(enable));
+  setsockopt(fd, SOL_SOCKET, SO_SNDBUF, &sendbuf, sizeof(int));
 }
 
 void setSocketNoLinger(int fd) {

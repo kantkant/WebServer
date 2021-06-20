@@ -86,14 +86,15 @@ private:
     int nowReadPos_;
     ParseState hState_;
     std::weak_ptr<HttpConn> httpConn_;
-    std::string bufferData_; //inbuffer && outbuffer
+    std::string inBuffer_; //inbuffer && outbuffer
+    std::string outBuffer_;
     ProcessState state_;
     HttpMethod method_;
     std::map<std::string, std::string> headers_;
     bool keepAlive_;
     std::string resourceName_;
     HttpVersion HTTPVersion_;
-    bool isReadAgain_;
+    bool isReadAgain_; //temprarily handleError
     /*
 private:
     static std::map<std::string, std::string> initResources();

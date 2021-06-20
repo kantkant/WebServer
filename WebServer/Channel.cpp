@@ -6,7 +6,9 @@ Channel::Channel(EventLoop* loop, int fd)
     :loop_(loop),
      fd_(fd),
      events_(0),
-     expiredTime_(5*60*1000) {}//std::cout << "Channel construct" << std::endl;}
+     expiredTime_(5*60*1000) {
+         //std::cout << "Channel construct" << std::endl;
+    }
 
 Channel::Channel(EventLoop* loop)
     :loop_(loop),
@@ -89,10 +91,10 @@ void Channel::handleEvents(TimerManager &timerManager) {
 }
 
 void Channel::handleTimer(TimerManager &timerManager) {
-    untieTimer(); //priority queue can't support "find"
+    //untieTimer(); //priority queue can't support "find"
     std::shared_ptr<HttpConn> httpconn = getHolder();
     if(httpconn) {
-        timerManager.addTimer(shared_from_this(), expiredTime_);
+        timerManager.modTimer(timer_.lock(), expiredTime_);
     }
     else {
         //httpconn distruct
@@ -117,6 +119,9 @@ void Channel::untieTimer() {
 
 void Channel::setExpTime(int timeout) {
     expiredTime_ = timeout;
+    if(timer_.lock()) {
+        timer_.lock()->update(timeout);
+    }
 }
 
 int Channel::getExpTime() const{

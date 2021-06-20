@@ -67,6 +67,10 @@ void TimerManager::addTimer(std::shared_ptr<Channel> channel, int timeout) {
   channel->linkTimer(new_node);
 }
 
+void TimerManager::modTimer(std::shared_ptr<TimerNode> timerNode,int timeout) {
+  timerNode->update(timeout);
+}
+
 void TimerManager::handleExpiredEvent() {
   while (!timerNodeQueue.empty()) {
     std::shared_ptr<TimerNode> ptimer_now = timerNodeQueue.top();
