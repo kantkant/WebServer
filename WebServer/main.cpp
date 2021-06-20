@@ -17,7 +17,7 @@ void hello(){
 int main(){  
     EventLoop loop;
     //loop.loop();
-    TcpServer server(&loop, 3, 1234);
+    TcpServer server(&loop, 1, 1234);
     server.start();
     loop.loop();
     return 0;

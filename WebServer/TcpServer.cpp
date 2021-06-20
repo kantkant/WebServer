@@ -19,7 +19,7 @@ TcpServer::TcpServer(EventLoop* loop, int threadnum, int port)
      idleFd_(open("/dev/null", O_RDONLY | O_CLOEXEC)),
      listenFd_(socket_bind_listen(port_)) {
         setSocketNonBlocking(listenFd_);
-        setSocketNodelay(listenFd_);
+        setSocketNodelayBytes(listenFd_, 4096);
         //acceptChannel_(std::move(new Channel(loop_, listenFd_))); //wrong,
         acceptChannel_ = std::make_shared<Channel>(loop_, listenFd_); //behind setsocketnonblocking
         //std::cout << "listeningFd: " << listenFd_ << std::endl;
@@ -49,7 +49,8 @@ void TcpServer::handleConnection() { //send work to channel
         if(setSocketNonBlocking(acceptFd) < 0) {
             //deal bad syscall
         }
-        setSocketNodelay(acceptFd);
+        setSocketNodelayBytes(acceptFd, 4096);
+        //setSocketNoLinger(acceptFd);
         std::shared_ptr<HttpConn> httpconn(new HttpConn(subLoop, acceptFd));
         subLoop->runInLoop(std::bind(&Epoll::setHttpConn, subLoop->epoller_, httpconn, acceptFd)); //avoid HttpConn distruct
         //subLoop->epoller_->setHttpConn(httpconn, acceptFd);

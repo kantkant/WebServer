@@ -28,8 +28,8 @@ void MimeType::init() {
     mime[".png"] = "image/png";
     mime[".txt"] = "text/plain";
     mime[".mp3"] = "audio/mp3";
-    mime["default"] = "404";
-    mime["hello"] = "Hello World\n";
+    mime["default"] = "400";
+    mime["hello"] = "Hello, World!\n";
 }
 
 std::string MimeType::getMime(const std::string &suffix) {
@@ -45,52 +45,49 @@ std::string MimeType::getMime(const std::string &suffix) {
 HttpServer::HttpServer(): 
     state_(STATE_PARSE_URI),
     method_(METHOD_GET),
-    keepAlive_(true),
+    keepAlive_(false),
     resourceName_("index.html"),
     HTTPVersion_(HTTP_11),
     isReadAgain_(false) {
         //std::cout << "httpServer construct" << std::endl;
     }
-HttpServer::~HttpServer() {}//std::cout << "httpServer distruct" << std::endl;}
+HttpServer::~HttpServer() {
+    //std::cout << "httpServer distruct" << std::endl;
+}
 
 void HttpServer::messageCallback(std::string &inbuffer, std::string &outBuffer) { //how to deal with data?
-    bufferData_ += inbuffer;
-    /*
-    if(receiveData_.size() > 0) {
-        //std::cout << inbuffer << std::endl;
-        if(httpConn_.lock()) {
-            httpConn_.lock()->enableWriting();
-        }
-        outBuffer_ = receiveData_;
-        receiveData_.clear();
-    }
-    */
+    inBuffer_ += inbuffer; //outbuffer_ clean in handleError
+    //outBuffer = bufferData_;
+    //httpConn_.lock()->enableWriting();
+    std::cout << inbuffer << std::endl;
     httpAnalysisRequest();
     if(state_ == STATE_FINISH) {
         //std::cout << "finish" << std::endl;
-        bufferData_.clear();
-        analysisRequest(); //warning:change name
         analysisReset();
-    } //handleError->handleWrite->writeCompleteCallback->close;
+    } //handleError->handleWrite->writeCompleteCallback->shutdown;
+    //std::cout << inBuffer_ << std::endl;
+    //std::cout << "------------" << std::endl;
+    //std::cout << isReadAgain_ << std::endl;
     if(!isReadAgain_ && httpConn_.lock()) {
-        httpConn_.lock()->enableWriting();
-        outBuffer = bufferData_;
-        bufferData_.clear();
+        outBuffer += outBuffer_; //outbuffer outside should not be clear, inbuffer inside should not be clear
+        outBuffer_.clear();
+        httpConn_.lock()->handleWrite();
+        //std::cout << outBuffer << std::endl;
         return;
     }
+
+    //httpConn_.lock()->enableReading();
     isReadAgain_ = false;
 }
 
 void HttpServer::writeCompleteCallback() {
-    //std::cout << "writeComplete" << std::endl;
-    if(httpConn_.lock() && !keepAlive_) {
-        httpConn_.lock()->handleClose();
-        return;
+    if(httpConn_.lock() && httpConn_.lock()->isWriting_) { //close EPOLLOUT
+        httpConn_.lock()->disableWriting();
     }
-    if(httpConn_.lock()) {
-        httpConn_.lock()->enableReading();
+    if(httpConn_.lock() && (!keepAlive_ || httpConn_.lock()->connectionState_ == H_DISCONNECTING)) {
+        httpConn_.lock()->shutDownInConn();
+        //httpConn_.lock()->handleClose();
     }
-
 }
 
 void HttpServer::connectionCallback(std::shared_ptr<HttpConn> httpconn) {
@@ -103,8 +100,8 @@ void HttpServer::closeCallback() {
 
 void HttpServer::handleError(std::string errormsg, int errorcode) {
     //send in outBuffer;
+    std::cout << "hadleError" << std::endl;
     errormsg = " " + errormsg;
-    char send_buff[4096];
     std::string body_buff, header_buff;
     body_buff += "<html><title>哎~出错了</title>";
     body_buff += "<body bgcolor=\"ffffff\">";
@@ -118,14 +115,8 @@ void HttpServer::handleError(std::string errormsg, int errorcode) {
     header_buff += "Server: Kant's Web Server\r\n";
     header_buff += "\r\n";
   // 错误处理不考虑writen不完的情况
-    bufferData_.clear();
-    bufferData_ = header_buff + body_buff;
-    /*
-    sprintf(send_buff, "%s", header_buff.c_str());
-    writen(fd, send_buff, strlen(send_buff));
-    sprintf(send_buff, "%s", body_buff.c_str());
-    writen(fd, send_buff, strlen(send_buff));
-    */
+    outBuffer_.clear();
+    outBuffer_ = header_buff + body_buff;
     if(httpConn_.lock()) {
         httpConn_.lock()->handleError();
     }
@@ -134,7 +125,7 @@ void HttpServer::handleError(std::string errormsg, int errorcode) {
 void HttpServer::httpAnalysisRequest() {
     if(state_ == STATE_PARSE_URI) {
         URIState flag = parseURI();
-        if(flag == PARSE_URI_AGAIN) {
+        if(flag == PARSE_URI_AGAIN) { //inbuffer_->requesetLine deleted
             isReadAgain_ = true;
             return;
         }
@@ -166,7 +157,7 @@ void HttpServer::httpAnalysisRequest() {
             handleError(errorMsg);
             return;
         }
-        if(static_cast<int>(bufferData_.size()) < content_length) {
+        if(static_cast<int>(inBuffer_.size()) < content_length) { //WARNING : inbuffer_ should not be compared with length
             return;
         }
         state_ = STATE_ANALYSIS;
@@ -174,7 +165,6 @@ void HttpServer::httpAnalysisRequest() {
     if(state_ == STATE_ANALYSIS) {
         AnalysisState flag = analysisRequest();
         if(flag != ANALYSIS_SUCCESS) {
-            handleError();
             return;
         }
         state_ = STATE_FINISH;
@@ -182,17 +172,17 @@ void HttpServer::httpAnalysisRequest() {
 }
 URIState HttpServer::parseURI() {
     // 读到完整的请求行再开始解析请求
-    size_t pos = bufferData_.find('\r', nowReadPos_);
+    size_t pos = inBuffer_.find('\r', nowReadPos_);
     if(pos < 0) {
         return PARSE_URI_AGAIN;
     }
-    // 去掉请求行所占的空间，节省空间  //why?
-    std::string request_line = bufferData_.substr(0, pos);
-    if(bufferData_.size() > pos + 1) {
-        bufferData_ = bufferData_.substr(pos + 1); // avoid repeat read
+    // 去掉请求行所占的空间，节省空间
+    std::string request_line = inBuffer_.substr(0, pos);
+    if(inBuffer_.size() > pos + 1) {
+        inBuffer_ = inBuffer_.substr(pos + 1); // ....\r ....
     }
     else {
-        bufferData_.clear();
+        inBuffer_.clear();
     }
     //Method
     int posGet = request_line.find("GET");
@@ -266,19 +256,26 @@ AnalysisState HttpServer:: analysisRequest() {  //to do : 20210619
         header += "HTTP/1.1 200 OK\r\n";
         if(headers_.find("Connection") != headers_.end() && (headers_["Connection"] == "Keep-Alive" || headers_["Connection"] == "keep-alive")) {
             keepAlive_ = true;
+            //std::cout << "keepalive" << keepAlive_ << std::endl;
             header += std::string("Connection: Keep-Alive\r\n") + "Keep-Alive: timeout=" + std::to_string(DEFAULT_KEEP_ALIVE_TIME) + "\r\n";
         }
-        std::cout << resourceName_ << std::endl;
+        //std::cout << resourceName_ << std::endl;
         std::string resourceContent = MimeType::getMime(resourceName_);
+       // std::cout << resourceContent << std::endl;
+        if(resourceContent == "400") {
+            //std::cout << "400" << std::endl;
+            handleError();
+            return ANALYSIS_ERROR;
+        }
         header += "Content-Length: " + std::to_string(static_cast<int>(resourceContent.size())) + "\r\n";
         header += "Server: Kant's Web Server\r\n";
         header += "\r\n";
         // 头部结束
-        bufferData_ += header;
+        outBuffer_ += header;
         if(method_ == METHOD_HEAD) {
             return ANALYSIS_SUCCESS;
         }
-        bufferData_ += resourceContent;
+        outBuffer_ += resourceContent;
         return ANALYSIS_SUCCESS;
     }
 }
@@ -295,10 +292,10 @@ HeaderState HttpServer::parseHeaders() {
     int now_read_line_begin = 0;
     bool notFinish = true;
     size_t i = 0;
-    for (; i < bufferData_.size() && notFinish; ++i) {
+    for (; i < inBuffer_.size() && notFinish; ++i) {
         switch (hState_) {
             case H_START: {
-                if(bufferData_[i] == '\n' || bufferData_[i] == '\r') { 
+                if(inBuffer_[i] == '\n' || inBuffer_[i] == '\r') { 
                     break;
                 }
                 hState_ = H_KEY;
@@ -307,20 +304,20 @@ HeaderState HttpServer::parseHeaders() {
                 break;
             }
             case H_KEY: {
-                if(bufferData_[i] == ':') {
+                if(inBuffer_[i] == ':') {
                     key_end = i;
                     if(key_end - key_start <= 0) {
                         return PARSE_HEADER_ERROR;
                     }
                     hState_ = H_COLON;
                 }
-                if(bufferData_[i] == '\n' || bufferData_[i] == '\r') {
+                if(inBuffer_[i] == '\n' || inBuffer_[i] == '\r') {
                     return PARSE_HEADER_ERROR;
                 }
                 break;
             }
             case H_COLON: {
-                if(bufferData_[i] == ' ') {
+                if(inBuffer_[i] == ' ') {
                     hState_ = H_SPACES_AFTER_COLON;
                 } 
                 else {
@@ -334,23 +331,23 @@ HeaderState HttpServer::parseHeaders() {
                 break;
             }
             case H_VALUE: {
-                if(bufferData_[i] == '\r') {
+                if(inBuffer_[i] == '\r') {
                     hState_ = H_CR;
                     value_end = i;
                 } 
-                if(bufferData_[i] == '\r' && value_end - value_start <= 0) {
+                if(inBuffer_[i] == '\r' && value_end - value_start <= 0) {
                     return PARSE_HEADER_ERROR;
                 }
-                if(bufferData_[i] != '\r' && i - value_start > 255) {
+                if(inBuffer_[i] != '\r' && i - value_start > 255) {
                     return PARSE_HEADER_ERROR;
                 }
                 break;
             }
             case H_CR: {
-                if(bufferData_[i] == '\n') {
+                if(inBuffer_[i] == '\n') {
                     hState_ = H_LF;
-                    std::string key(bufferData_.begin() + key_start, bufferData_.begin() + key_end);
-                    std::string value(bufferData_.begin() + value_start, bufferData_.begin() + value_end);
+                    std::string key(inBuffer_.begin() + key_start, inBuffer_.begin() + key_end);
+                    std::string value(inBuffer_.begin() + value_start, inBuffer_.begin() + value_end);
                     headers_[key] = value;
                     now_read_line_begin = i;
                 } 
@@ -360,7 +357,7 @@ HeaderState HttpServer::parseHeaders() {
                 break;
             }
             case H_LF: {
-                if (bufferData_[i] == '\r') {
+                if (inBuffer_[i] == '\r') {
                     hState_ = H_END_CR;
                 } 
                 else {
@@ -370,7 +367,7 @@ HeaderState HttpServer::parseHeaders() {
                 break;
             }
             case H_END_CR: {
-                if (bufferData_[i] == '\n') {
+                if (inBuffer_[i] == '\n') {
                     hState_ = H_END_LF;
                 } 
                 else {
@@ -387,10 +384,10 @@ HeaderState HttpServer::parseHeaders() {
         }
     }
     if(hState_ == H_END_LF) {
-        bufferData_ = bufferData_.substr(i);
+        inBuffer_ = inBuffer_.substr(i);
         return PARSE_HEADER_SUCCESS;
     }
-    bufferData_ = bufferData_.substr(now_read_line_begin);
+    inBuffer_ = inBuffer_.substr(now_read_line_begin);
     return PARSE_HEADER_AGAIN;
 }
 

@@ -22,13 +22,16 @@ public:
     void handleError();
     void handleNewEvents();
     void enableWriting();
-    void enableReading();
+    void disableWriting();
     void setExpTime(int timeout);
+    void shutDownInConn();
 private:
     std::string inBuffer_;
     std::string outBuffer_;
     std::shared_ptr<Channel> channel_;
     EventLoop* loop_;
+public:
+    bool isWriting_;
 public:
     ConnectionState connectionState_;
 private:
