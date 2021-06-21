@@ -15,13 +15,13 @@ bool benchmark = false;
 
 void onRequest(const HttpRequest& req, HttpResponse* resp)
 {
-  std::cout << "Headers " << req.methodString() << " " << req.path() << std::endl;
+  //std::cout << "Headers " << req.methodString() << " " << req.path() << std::endl;
   if (!benchmark)
   {
     const std::map<string, string>& headers = req.headers();
     for (const auto& header : headers)
     {
-      std::cout << header.first << ": " << header.second << std::endl;
+    //  std::cout << header.first << ": " << header.second << std::endl;
     }
   }
 
@@ -61,7 +61,7 @@ void onRequest(const HttpRequest& req, HttpResponse* resp)
 
 int main(int argc, char* argv[])
 {
-  int numThreads = 0;
+  int numThreads = 3;
   if (argc > 1)
   {
     benchmark = true;
