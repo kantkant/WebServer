@@ -1,5 +1,5 @@
 #include "HttpConn.h"
-#include "Util.h"
+#include "./base/Util.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <memory>
@@ -45,7 +45,7 @@ void HttpConn::handleRead() {
         //std::cout << "MessegeComplete" << std::endl;
         httpServer_->messageCallback(inBuffer_, outBuffer_); //set TIME_OUT for one conn
     }
-    else if(n == 0) {
+    else if(n == 0 && errno != EAGAIN) {
         //std::cout << "handleClose" << std::endl;
         handleClose();
     }

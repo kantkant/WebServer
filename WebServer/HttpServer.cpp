@@ -1,5 +1,5 @@
 #include "HttpConn.h"
-#include "Util.h"
+#include "./base/Util.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <memory>
@@ -87,6 +87,7 @@ void HttpServer::writeCompleteCallback() {
         httpConn_.lock()->disableWriting();
     }
     if(httpConn_.lock() && (!keepAlive_ || httpConn_.lock()->connectionState_ == H_DISCONNECTING)) {
+        //std::cout << "shut" << std::endl;
         httpConn_.lock()->shutDownInConn();
         //httpConn_.lock()->handleClose();
     }
