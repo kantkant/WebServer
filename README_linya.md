@@ -44,7 +44,7 @@
 
 ## 代码统计
 
-![cloc](https://github.com/linyacool/WebServer/blob/master/datum/cloc.png)
+![cloc](https://github.com/kantkant/WebServer/blob/master/datum/cloc.png)
 
 
 ## Others
