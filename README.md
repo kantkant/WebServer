@@ -1,20 +1,19 @@
 # A C++ High Performance Web Server
 
-[![Build Status](https://travis-ci.org/linyacool/WebServer.svg?branch=master)](https://travis-ci.org/linyacool/WebServer)
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT)
+[![Build Status](https://travis-ci.org/linyacool/WebServer.svg?branch=master)](https://travis-ci.org/linyacool/WebServer) todo
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT)  todo
 
   
 ## Introduction  
 
 本项目为C++11编写的Web服务器，解析了get、head请求，可处理静态资源，支持HTTP长连接，支持管线化请求，记录服务器运行状态。  
 
-测试页：http://www.linya.pu/
+测试页：http://www.neijuanwang/
 
 
-| Part Ⅰ | Part Ⅱ | Part Ⅲ | Part Ⅳ | Part Ⅴ |
-| :--------: | :---------: | :---------: | :---------: | :---------: | 
-| [并发模型](https://github.com/kantkant/WebServer/blob/master/并发模型.md)|[连接的维护](https://github.com/kantkant/WebServer/blob/master/连接的维护.md) | [测试及改进](https://github.com/linyacool/WebServer/blob/master/测试及改进.md) | [项目目的](https://github.com/linyacool/WebServer/blob/master/%E9%A1%B9%E7%9B%AE%E7%9B%AE%E7%9A%84.md) | [面试问题](https://github.com/linyacool/WebServer/blob/master/%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98.md)
-
+| Part Ⅰ | Part Ⅱ | Part Ⅲ | Part Ⅳ |
+| :--------: | :---------: | :---------: | :---------: |
+| [并发模型](https://github.com/kantkant/WebServer/并发模型.md)|[连接的维护](https://github.com/kantkant/WebServer/连接的维护.md) | [测试及改进](https://github.com/kantkant/WebServer/测试及改进.md) | [项目目的](https://github.com/kantkant/WebServer/项目目的.md)
 ## Envoirment  
 * OS: Ubuntu 18.04
 * Complier: g++ 4.8
@@ -39,7 +38,7 @@
  
 ## Model
 
-并发模型为Reactor+非阻塞IO+线程池，新连接Round Robin分配，详细介绍请参考[并发模型](https://github.com/linyacool/WebServer/blob/master/并发模型.md)
+并发模型为Reactor+非阻塞IO+线程池，新连接Round Robin分配，详细介绍请参考[并发模型](https://github.com/kantkant/WebServer/并发模型.md)
 ![并发模型](https://github.com/kantkant/WebServer/testData/model.png)
 
 ## 代码统计
