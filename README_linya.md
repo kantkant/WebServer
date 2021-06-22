@@ -40,13 +40,11 @@
 ## Model
 
 并发模型为Reactor+非阻塞IO+线程池，新连接Round Robin分配，详细介绍请参考[并发模型](https://github.com/linyacool/WebServer/blob/master/并发模型.md)
-![并发模型](https://github.com/kantkant/WebServer/testData_todo/model.png)
+![并发模型](https://github.com/kantkant/WebServer/testData/model.png)
 
 ## 代码统计
 
-![cloc](https://github.com/kantkant/WebServer/blob/master/datum/cloc.png)
+![cloc](https://github.com/kantkant/WebServer/testData/cloc.png)
 
 
-## Others
-除了项目基本的代码，进服务器进行压测时，对开源测试工具Webbench增加了Keep-Alive选项和测试功能: 改写后的[Webbench](https://github.com/kantkant/WebBench)
 
