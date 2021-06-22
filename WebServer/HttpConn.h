@@ -30,6 +30,7 @@ private:
     std::string outBuffer_;
     std::shared_ptr<Channel> channel_;
     EventLoop* loop_;
+    bool shutDownInWrite;
 public:
     bool isWriting_;
 public:

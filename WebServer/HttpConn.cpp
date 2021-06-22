@@ -14,7 +14,8 @@ HttpConn::HttpConn(EventLoop* loop, int fd)
      channel_(new Channel(loop_, fd)),
      connectionState_(H_CONNECTED),
      httpServer_(new HttpServer()),
-     isWriting_(false) {
+     isWriting_(false),
+     shutDownInWrite(false) {
          channel_->setReadcallback(std::bind(&HttpConn::handleRead, this));
          channel_->setWritecallback(std::bind(&HttpConn::handleWrite, this));
          channel_->setCloseCallBack(std::bind(&HttpConn::handleClose, this));
@@ -39,15 +40,20 @@ void HttpConn::disableWriting() {
 
 void HttpConn::handleRead() {
     inBuffer_.clear();
-    ssize_t n = readn(channel_->getFd(), inBuffer_); //let channel get fd;
+    bool isFIN = false;
+    ssize_t n = readn(channel_->getFd(), inBuffer_, isFIN); //let channel get fd;
     //std::cout << "handleRead" << std::endl;
     if(n > 0) {
         //std::cout << "MessegeComplete" << std::endl;
         httpServer_->messageCallback(inBuffer_, outBuffer_); //set TIME_OUT for one conn
     }
-    else if(n == 0 && errno != EAGAIN) {
+    else if(n == 0 && isFIN && outBuffer_.size() == 0) { //WARNING:keepalive readn = 0 ------------------- 06/21
         //std::cout << "handleClose" << std::endl;
         handleClose();
+    }
+    else if(n == 0 && isFIN && outBuffer_.size() != 0) { //if client send FIN, we should keep writing
+        shutDownInWrite = true;
+        handleWrite();
     }
     else {
         handleError();
@@ -58,9 +64,12 @@ void HttpConn::handleWrite() { //care about buffer free
     int outBufSize = outBuffer_.size();
     ssize_t n = writen(channel_->getFd(), outBuffer_);
     //std::cout << "handleWrite" << std::endl;
-    if(n > 0 && n == outBufSize) {
+    if(n > 0 && n == outBufSize && !shutDownInWrite) {
         //std::cout << "WriteComp" << std::endl;
         httpServer_->writeCompleteCallback();  //watch out !!!!! 6/18
+    }
+    if(n > 0 && n == outBufSize && shutDownInWrite) {
+        handleClose();
     }
     if(errno == EAGAIN && !isWriting_) {
         enableWriting();
