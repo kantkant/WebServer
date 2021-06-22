@@ -9,7 +9,7 @@
 
 | Part Ⅰ | Part Ⅱ | Part Ⅲ | Part Ⅳ |
 | :--------: | :---------: | :---------: | :---------: |
-| [并发模型](https://github.com/kantkant/WebServer/blob/master/并发模型.md)|[连接的维护](https://github.com/kantkant/WebServer/blob/master/连接的维护.md) | [测试及改进](https://github.com/kantkant/WebServer/blob/master/测试及改进.md) | [项目目的](https://github.com/kantkant/WebServer/blob/master/项目目的.md)
+| [并发模型](https://github.com/kantkant/WebServer/blob/master/并发模型.md)|[连接的维护](https://github.com/kantkant/WebServer/blob/master/连接的维护.md) | [测试、改进及部署](https://github.com/kantkant/WebServer/blob/master/测试及改进.md) | [项目目的](https://github.com/kantkant/WebServer/blob/master/项目目的.md)
 ## Envoirment  
 * OS: Ubuntu 18.04
 * Complier: g++ 4.8
