@@ -34,17 +34,17 @@
 
 ## 测试结果截图
 * WebServer短连接测试  
-![shortWeb](https://github.com/kantkant/WebServer/testData/WebServer.png)
+![shortWeb](https://github.com/kantkant/WebServer/blob/master/testData/WebServer.png)
 * muduo短连接测试  
-![shortMuduo](https://github.com/kantkant/WebServer/testData/muduo.png)
+![shortMuduo](https://github.com/kantkant/WebServer/blob/master/testData/muduo.png)
 * WebServer长连接测试  
-![keepWeb](https://github.com/kantkant/WebServer/testData/WebServerk.png)
+![keepWeb](https://github.com/kantkant/WebServer/blob/master/testData/WebServerk.png)
 * muduo长连接测试  
-![keepMuduo](https://github.com/kantkant/WebServer/testData/muduok.png)
+![keepMuduo](https://github.com/kantkant/WebServer/blob/master/testData/muduok.png)
 * WebServer空闲负载  
-![idle](https://github.com/kantkant/WebServer/testData/idle.png)
+![idle](https://github.com/kantkant/WebServer/blob/master/testData/idle.png)
 * WebServer短连接CPU负载  
-![short](https://github.com/kantkant/WebServer/testData/close.png)
+![short](https://github.com/kantkant/WebServer/blob/master/testData/close.png)
 * WebServer长连接CPU负载  
-![keep](https://github.com/kantkant/WebServer/testData/keepalive.png)
+![keep](https://github.com/kantkant/WebServer/blob/master/testData/keepalive.png)
 
