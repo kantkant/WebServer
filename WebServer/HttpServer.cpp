@@ -15,19 +15,7 @@ pthread_once_t MimeType::once_control = PTHREAD_ONCE_INIT;
 std::unordered_map<std::string, std::string> MimeType::mime;
 
 void MimeType::init() {
-    mime["index.html"] = "good good";
-    mime[".avi"] = "video/x-msvideo";
-    mime[".bmp"] = "image/bmp";
-    mime[".c"] = "text/plain";
-    mime[".doc"] = "application/msword";
-    mime[".gif"] = "image/gif";
-    mime[".gz"] = "application/x-gzip";
-    mime[".htm"] = "text/html";
-    mime[".ico"] = "image/x-icon";
-    mime[".jpg"] = "image/jpeg";
-    mime[".png"] = "image/png";
-    mime[".txt"] = "text/plain";
-    mime[".mp3"] = "audio/mp3";
+    mime["index.html"] = "Kant's WebServer";
     mime["default"] = "400";
     mime["hello"] = "Hello, World!\n";
 }
@@ -83,9 +71,6 @@ void HttpServer::messageCallback(std::string &inbuffer, std::string &outBuffer) 
 }
 
 void HttpServer::writeCompleteCallback() {
-    if(httpConn_.lock() && httpConn_.lock()->isWriting_) { //close EPOLLOUT
-        httpConn_.lock()->disableWriting();
-    }
     if(httpConn_.lock() && (!keepAlive_ || httpConn_.lock()->connectionState_ == H_DISCONNECTING)) {
         //std::cout << "shut" << std::endl;
         httpConn_.lock()->shutDownInConn();

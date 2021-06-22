@@ -27,7 +27,7 @@ HttpConn::~HttpConn() {
 }
 
 void HttpConn::enableWriting() {
-    channel_->setEvents(EPOLLIN | EPOLLOUT | EPOLLET);
+    channel_->setEvents(EPOLLOUT | EPOLLET);
     isWriting_ = true;
     loop_->updatePoller(channel_);
 }
@@ -68,10 +68,13 @@ void HttpConn::handleWrite() { //care about buffer free
         //std::cout << "WriteComp" << std::endl;
         httpServer_->writeCompleteCallback();  //watch out !!!!! 6/18
     }
+    if(n > 0 &&  n == outBufSize && !shutDownInWrite && isWriting_) {
+        disableWriting();
+    }
     if(n > 0 && n == outBufSize && shutDownInWrite) {
         handleClose();
     }
-    if(errno == EAGAIN && !isWriting_) {
+    if(n >= 0 && n < outBufSize && !isWriting_) {
         enableWriting();
     }
     if(n <= 0) {
