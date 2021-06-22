@@ -9,7 +9,7 @@
 
 | Part Ⅰ | Part Ⅱ | Part Ⅲ | Part Ⅳ |
 | :--------: | :---------: | :---------: | :---------: |
-| [并发模型](https://github.com/kantkant/WebServer/并发模型.md)|[连接的维护](https://github.com/kantkant/WebServer/连接的维护.md) | [测试及改进](https://github.com/kantkant/WebServer/测试及改进.md) | [项目目的](https://github.com/kantkant/WebServer/项目目的.md)
+| [并发模型](https://github.com/kantkant/WebServer/blob/master/并发模型.md)|[连接的维护](https://github.com/kantkant/WebServer/blob/master/连接的维护.md) | [测试及改进](https://github.com/kantkant/WebServer/blob/master/测试及改进.md) | [项目目的](https://github.com/kantkant/WebServer/blob/master/项目目的.md)
 ## Envoirment  
 * OS: Ubuntu 18.04
 * Complier: g++ 4.8
@@ -34,12 +34,12 @@
  
 ## Model
 
-并发模型为Reactor+非阻塞IO+线程池，新连接Round Robin分配，详细介绍请参考[并发模型](https://github.com/kantkant/WebServer/并发模型.md)
-![并发模型](https://github.com/kantkant/WebServer/testData/model.png)
+并发模型为Reactor+非阻塞IO+线程池，新连接Round Robin分配，详细介绍请参考[并发模型](https://github.com/kantkant/WebServer/blob/master/并发模型.md)
+![并发模型](https://github.com/kantkant/WebServer/blob/master/testData/model.png)
 
 ## 代码统计
 
-![cloc](https://github.com/kantkant/WebServer/testData/cloc.png)
+![cloc](https://github.com/kantkant/WebServer/blob/master/testData/cloc.png)
 
 
 
