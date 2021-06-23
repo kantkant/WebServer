@@ -10,14 +10,11 @@
 #include "HttpConn.h"
 #include <sys/eventfd.h>
 
-void hello(){
-    std::cout << "Hello, ssp offer!" << std::endl;
-}
 
 int main(){  
     EventLoop loop;
     //loop.loop();
-    TcpServer server(&loop, 3, 1234);
+    TcpServer server(&loop, 3, 80);
     server.start();
     loop.loop();
     return 0;

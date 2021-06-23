@@ -15,7 +15,7 @@ pthread_once_t MimeType::once_control = PTHREAD_ONCE_INIT;
 std::unordered_map<std::string, std::string> MimeType::mime;
 
 void MimeType::init() {
-    mime["index.html"] = "Kant's WebServer";
+    mime["main"] = "Kant's WebServer\n";
     mime["default"] = "400";
     mime["hello"] = "Hello, World!\n";
 }
@@ -34,7 +34,7 @@ HttpServer::HttpServer():
     state_(STATE_PARSE_URI),
     method_(METHOD_GET),
     keepAlive_(false),
-    resourceName_("index.html"),
+    resourceName_("main"),
     HTTPVersion_(HTTP_11),
     isReadAgain_(false),
     nowReadPos_(0),
@@ -193,7 +193,7 @@ URIState HttpServer::parseURI() {
     }
     pos = request_line.find("/", pos);
     if(pos < 0) {
-        resourceName_ = "index.html";
+        resourceName_ = "main";
         HTTPVersion_ = HTTP_11;
         return PARSE_URI_SUCCESS;
     }
@@ -210,7 +210,7 @@ URIState HttpServer::parseURI() {
         resourceName_ = resourceName_.substr(0, __pos); //[)-> 0 + __pos
     }
     if(_pos - pos <= 1) {
-        resourceName_ = "index.html";
+        resourceName_ = "main";
     }
     pos = _pos;
     // cout << "fileName_: " << fileName_ << endl;
@@ -250,7 +250,7 @@ AnalysisState HttpServer:: analysisRequest() {  //to do : 20210619
         //std::cout << resourceName_ << std::endl;
         std::string resourceContent = MimeType::getMime(resourceName_);
        // std::cout << resourceContent << std::endl;
-        if(resourceContent == "400") {
+	if(resourceContent == "400") {
             //std::cout << "400" << std::endl;
             handleError();
             return ANALYSIS_ERROR;

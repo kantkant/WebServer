@@ -18,4 +18,4 @@ if [[ -f Makefile ]];then
 	rm Makefile
 fi
 
-./myWebServer
+
