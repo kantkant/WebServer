@@ -23,7 +23,7 @@
 	./myWebServer
 
 ## Technical points
-* 基于epoll的IO复用机制实现Reactor模式，采用边缘触发（ET）模式，和非阻塞模式
+* 基于epoll的IO复用机制实现Reactor模式，采用边缘触发（ET）模式和非阻塞模式
 * 使用多线程充分利用多核CPU，并使用线程池避免线程频繁创建销毁的开销
 * 使用基于小根堆的定时器关闭超时请求
 * 主线程只负责accept请求，并以Round Robin的方式分发给其它IO线程(兼计算线程)，锁的争用只会出现在主线程和某一特定线程中
