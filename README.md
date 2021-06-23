@@ -2,7 +2,7 @@
   
 ## Introduction  
 
-本项目为C++11编写的Web服务器，解析了get、head请求，可处理静态资源，支持HTTP长连接，支持管线化请求，记录服务器运行状态。  
+本项目为C++11编写的Web服务器，解析了get、head请求，可处理静态资源，支持HTTP长连接，记录服务器运行状态。  
 
 测试页：http://www.neijuanwang.com/main
 
@@ -23,7 +23,7 @@
 	./myWebServer
 
 ## Technical points
-* 使用Epoll边沿触发的IO多路复用技术，非阻塞IO，使用Reactor模式
+* 基于epoll的IO复用机制实现Reactor模式，采用边缘触发（ET）模式，和非阻塞模式
 * 使用多线程充分利用多核CPU，并使用线程池避免线程频繁创建销毁的开销
 * 使用基于小根堆的定时器关闭超时请求
 * 主线程只负责accept请求，并以Round Robin的方式分发给其它IO线程(兼计算线程)，锁的争用只会出现在主线程和某一特定线程中
