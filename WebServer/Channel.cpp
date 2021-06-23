@@ -58,7 +58,7 @@ void Channel::setEvents(__uint32_t event) {
     events_ = event; 
 }
 
-__uint32_t Channel::getEvents() { return events_; } //should be a reference type
+__uint32_t Channel::getEvents() const{ return events_; } //should be a reference type
 
 void Channel::setHolder(std::shared_ptr<HttpConn> httpconn) { holder_ = httpconn; }
 
@@ -69,7 +69,7 @@ std::shared_ptr<HttpConn> Channel::getHolder() {
 
 void Channel::setFd(int fd) { fd_ = fd; }
 
-int Channel::getFd() { return fd_; }
+int Channel::getFd() const{ return fd_; }
 
 void Channel::handleEvents(TimerManager &timerManager) {
     if(timer_.lock()) {

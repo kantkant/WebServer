@@ -187,14 +187,14 @@ int socket_bind_listen(int port) {
   int listen_fd = 0;
   if ((listen_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) return -1;
 
-  // 消除bind时"Address already in use"错误
+  // 消除bind时"Address already in use"错误，设置端口重用
   int optval = 1;
   if (setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1) {
     close(listen_fd);
     return -1;
   }
 
-  // 设置服务器IP和Port，和监听描述副绑定
+  // 设置服务器IP和Port，和监听描述符绑定
   struct sockaddr_in server_addr;
   bzero((char *)&server_addr, sizeof(server_addr));
   server_addr.sin_family = AF_INET;

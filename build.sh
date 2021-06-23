@@ -2,6 +2,7 @@
 
 cmake .
 make
+
 if [[ -f CMakeCache.txt ]];then
 	rm CMakeCache.txt
 fi

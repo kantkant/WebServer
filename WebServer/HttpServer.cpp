@@ -15,7 +15,7 @@ pthread_once_t MimeType::once_control = PTHREAD_ONCE_INIT;
 std::unordered_map<std::string, std::string> MimeType::mime;
 
 void MimeType::init() {
-    mime["main"] = "Kant's WebServer\n";
+    mime["main"] = "<a href=\"https://github.com/kantkant/WebServer\">项目github地址</a><br><a href=\"https://docs.qq.com/doc/DS0hNRk5iV2ZpT3pZ\">项目记录文档</a><br><a href=\"http://neijuanwang.com/hello\">压力测试地址</a><br><hr><em> Kant's Web Server</em>\n</body></html>";
     mime["default"] = "400";
     mime["hello"] = "Hello, World!\n";
 }
@@ -250,7 +250,7 @@ AnalysisState HttpServer:: analysisRequest() {  //to do : 20210619
         //std::cout << resourceName_ << std::endl;
         std::string resourceContent = MimeType::getMime(resourceName_);
        // std::cout << resourceContent << std::endl;
-	if(resourceContent == "400") {
+	    if(resourceContent == "400") {
             //std::cout << "400" << std::endl;
             handleError();
             return ANALYSIS_ERROR;

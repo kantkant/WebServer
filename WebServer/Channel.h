@@ -39,14 +39,13 @@ public:
     int getExpTime() const;
 public:
     void setEvents(__uint32_t events);
-    __uint32_t getEvents();
+    __uint32_t getEvents() const;
 public:
     void setHolder(std::shared_ptr<HttpConn> httpconn);
     std::shared_ptr<HttpConn> getHolder();
 public:
     void setFd(int fd);
-    int getFd();
-    
+    int getFd() const;
 private:
     __uint32_t events_;
     EventLoop* loop_;
