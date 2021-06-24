@@ -15,9 +15,10 @@ pthread_once_t MimeType::once_control = PTHREAD_ONCE_INIT;
 std::unordered_map<std::string, std::string> MimeType::mime;
 
 void MimeType::init() {
-    mime["main"] = "<a href=\"https://github.com/kantkant/WebServer\">项目github地址</a><br><a href=\"https://docs.qq.com/doc/DS0hNRk5iV2ZpT3pZ\">项目记录文档</a><br><a href=\"http://neijuanwang.com/hello\">压力测试地址</a><br><hr><em> Kant's Web Server</em>\n</body></html>";
+    mime["main"] = "<a href=\"https://github.com/kantkant/WebServer\">项目github地址</a><br><a href=\"https://docs.qq.com/doc/DS0hNRk5iV2ZpT3pZ\">项目记录文档</a><br><a href=\"http://neijuanwang.com/hello\">线下压力测试地址</a><br><hr><em> Kant's Web Server</em></body></html>";
     mime["default"] = "400";
-    mime["hello"] = "Hello, World!\n";
+    mime["hello"] = "Hello, World!";
+    mime["xiaojingjing"] = "o.o<br><hr><em> Kant's Web Server</em></body></html>";
 }
 
 std::string MimeType::getMime(const std::string &suffix) {
@@ -60,6 +61,7 @@ void HttpServer::messageCallback(std::string &inbuffer, std::string &outBuffer) 
     //std::cout << isReadAgain_ << std::endl;
     if(!isReadAgain_ && httpConn_.lock()) {
         outBuffer += outBuffer_; //outbuffer outside should not be clear, inbuffer inside should not be clear
+        //std::cout << outBuffer << std::endl;
         outBuffer_.clear();
         httpConn_.lock()->handleWrite();
         //std::cout << outBuffer << std::endl;
@@ -68,14 +70,15 @@ void HttpServer::messageCallback(std::string &inbuffer, std::string &outBuffer) 
 
     //httpConn_.lock()->enableReading();
     isReadAgain_ = false;
+
+}
+
+bool HttpServer::isKeepAilve() const {
+    return keepAlive_;
 }
 
 void HttpServer::writeCompleteCallback() {
-    if(httpConn_.lock() && (!keepAlive_ || httpConn_.lock()->connectionState_ == H_DISCONNECTING)) {
-        //std::cout << "shut" << std::endl;
-        httpConn_.lock()->shutDownInConn();
-        //httpConn_.lock()->handleClose();
-    }
+
 }
 
 void HttpServer::connectionCallback(std::shared_ptr<HttpConn> httpconn) {
@@ -94,7 +97,7 @@ void HttpServer::handleError(std::string errormsg, int errorcode) {
     body_buff += "<html><title>哎~出错了</title>";
     body_buff += "<body bgcolor=\"ffffff\">";
     body_buff += std::to_string(errorcode) + errormsg;
-    body_buff += "<hr><em> Kant's Web Server</em>\n</body></html>";
+    body_buff += "<hr><em> Kant's Web Server</em></body></html>";
 
     header_buff += "HTTP/1.1 " + std::to_string(errorcode) + errormsg + "\r\n";
     header_buff += "Content-Type: text/html\r\n";

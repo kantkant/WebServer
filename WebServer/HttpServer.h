@@ -76,6 +76,7 @@ public:
     void messageCallback(std::string &inbuffer, std::string &outBuffer);
     void closeCallback();
     void connectionCallback(std::shared_ptr<HttpConn> httpconn);
+    bool isKeepAilve() const;
 private:
     void handleError(std::string errormsg = "Bad Request", int errorcode = 400);
     void httpAnalysisRequest();

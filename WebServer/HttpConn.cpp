@@ -15,7 +15,7 @@ HttpConn::HttpConn(EventLoop* loop, int fd)
      connectionState_(H_CONNECTED),
      httpServer_(new HttpServer()),
      isWriting_(false),
-     shutDownInWrite(false) {
+     closeInWrite_(false) {
          channel_->setReadcallback(std::bind(&HttpConn::handleRead, this));
          channel_->setWritecallback(std::bind(&HttpConn::handleWrite, this));
          channel_->setCloseCallBack(std::bind(&HttpConn::handleClose, this));
@@ -52,7 +52,7 @@ void HttpConn::handleRead() {
         handleClose();
     }
     else if(n == 0 && isFIN && outBuffer_.size() != 0) { //if client send FIN, we should keep writing
-        shutDownInWrite = true;
+        closeInWrite_ = true;
         handleWrite();
     }
     else {
@@ -62,16 +62,29 @@ void HttpConn::handleRead() {
 
 void HttpConn::handleWrite() { //care about buffer free
     int outBufSize = outBuffer_.size();
+    //std::cout << outBuffer_ << std::endl;
     ssize_t n = writen(channel_->getFd(), outBuffer_);
     //std::cout << "handleWrite" << std::endl;
-    if(n > 0 && n == outBufSize && !shutDownInWrite) {
+    if(n > 0 && n == outBufSize) {
         //std::cout << "WriteComp" << std::endl;
         httpServer_->writeCompleteCallback();  //watch out !!!!! 6/18
     }
-    if(n > 0 &&  n == outBufSize && !shutDownInWrite && isWriting_) {
+    if(n > 0 && n == outBufSize && !closeInWrite_ && (!httpServer_->isKeepAilve() || connectionState_ == H_DISCONNECTING)) {
+        handleClose();   //shutdown when finish write
+        //shutDownInConn();
+        /*
+        这里在进行压测时遇到了一些问题，如果短链接调用shutDownInConn，
+        客端调用关闭速度较慢的情况下，可能出现Fd耗尽的情况
+        调用shutDownInConn相当于把主动权交给了客端，对于恶意请求或者高并发的情况，没有更好的办法。
+        目前暂定为handleColse()，后续可能做出改进。
+        */
+        //std::cout << "shutdown" << std::endl;
+        return;
+    }
+    if(n > 0 && n == outBufSize && !closeInWrite_ && isWriting_) {
         disableWriting();
     }
-    if(n > 0 && n == outBufSize && shutDownInWrite) {
+    if(n > 0 && n == outBufSize && closeInWrite_) {
         handleClose();
     }
     if(n >= 0 && n < outBufSize && !isWriting_) {
@@ -112,5 +125,5 @@ void HttpConn::setExpTime(int timeout) {
 }
 
 void HttpConn::shutDownInConn() {
-    shutdown(channel_->getFd(), SHUT_WR);
+    shutDownWR(channel_->getFd());
 }
