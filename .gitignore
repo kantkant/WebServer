@@ -1,1 +1,4 @@
 demo/*.zip
+Webserver/log/test/CMakeFiles/*
+Webserver/log/test/Makefile
+Webserver/log/test/cmake_install.cmake
