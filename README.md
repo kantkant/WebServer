@@ -2,7 +2,7 @@
   
 ## Introduction  
 
-本项目为C++11编写的Web服务器，解析了get、head请求，可处理静态资源，支持HTTP长连接，记录服务器运行状态。  
+本项目为C++11编写的Web服务器，解析了get、head请求，可处理静态资源，支持HTTP长连接，以守护进程的方式运行。  
 
 测试页：http://www.neijuanwang.com/main
 
@@ -20,7 +20,7 @@
 
 ## Usage
 
-	./myWebServer
+	./myWebServerd
 
 ## Technical points
 * 使用组合代替继承，减少代码耦合，降低重构成本
