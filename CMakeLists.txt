@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(myWebServer CXX)
+project(myWebServerd CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS -std=c++11)
 set(HEADERS *.h)
@@ -34,5 +34,6 @@ add_executable(${PROJECT_NAME}
 	./WebServer/Timer.cpp
 	./WebServer/HttpServer.h
 	./WebServer/HttpServer.cpp
+	./WebServer/deamon.h
 )
 target_link_libraries(${PROJECT_NAME} -lpthread)

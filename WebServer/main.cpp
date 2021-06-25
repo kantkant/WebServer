@@ -1,17 +1,10 @@
-#include <iostream>
-#include "EventLoopThreadPool.h"
 #include "EventLoop.h"
-#include "./base/Util.h"
-#include <sys/socket.h>
-#include <errno.h>
-#include <string.h>
-#include "Channel.h"
 #include "TcpServer.h"
-#include "HttpConn.h"
-#include <sys/eventfd.h>
+#include "deamon.h"
 
 
-int main(){  
+int main(){
+    create_deamon();
     EventLoop loop;
     //loop.loop();
     TcpServer server(&loop, 3, 80);
