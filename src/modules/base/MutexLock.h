@@ -1,7 +1,7 @@
 #pragma once
 #include <pthread.h>
 #include <cstdio>
-#include "../noncopyable.h"
+#include "../net/noncopyable.h"
 
 
 class MutexLock : noncopyable {

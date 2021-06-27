@@ -5,7 +5,7 @@
 #include <time.h>
 #include <cstdint>
 #include "MutexLock.h"
-#include "../noncopyable.h"
+#include "../net/noncopyable.h"
 
 
 class Condition : noncopyable {

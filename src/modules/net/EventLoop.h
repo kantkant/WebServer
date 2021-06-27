@@ -5,8 +5,8 @@
 #include <thread>
 #include "Epoll.h"
 #include "noncopyable.h"
-#include "./base/MutexLock.h"
-#include "./base/Condition.h"
+#include "../base/MutexLock.h"
+#include "../base/Condition.h"
 #include <sys/eventfd.h>
 #include <functional>
 #include "Timer.h"

@@ -1,1 +1,12 @@
 demo/*.zip
+
+build
+.vscode
+
+WebServer/CMakeCache.txt
+WebServer/CMakeFiles
+WebServer/Makefile
+WebServer/cmake_install.cmake_install
+WebServer/compile_commands.json
+WebServer/CMakeFiles
+WebServer/build

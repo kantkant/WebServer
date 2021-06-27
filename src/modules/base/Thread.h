@@ -6,7 +6,7 @@
 #include <memory>
 #include <string>
 #include "CountDownLatch.h"
-#include "../noncopyable.h"
+#include "../net/noncopyable.h"
 
 class Thread : noncopyable {
 public:
