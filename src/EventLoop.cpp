@@ -3,10 +3,10 @@
 #include <sys/syscall.h>
 #include <thread>
 #include <assert.h>
-#include "../base/Util.h"
+#include "./base/Util.h"
 #include "Channel.h"
-#include "../base/MutexLock.h"
-#include "../base/Condition.h"
+#include "./base/MutexLock.h"
+#include "./base/Condition.h"
 
 
 __thread EventLoop* loopInthisThread_ = nullptr;
