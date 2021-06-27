@@ -7,6 +7,7 @@
 #include <functional>
 #include <sys/epoll.h>
 #include "noncopyable.h"
+#include "TimerNodeList.h"
 
 class EventLoop;
 class HttpConn;
@@ -29,12 +30,14 @@ public:
     void handleWrite();
     void handleError();
     void handleConn();
-    void handleEvents(TimerManager &timerManager);
+    void handleEvents(TimerNodeList &timerManager);
     void handleClose();
-    void handleTimer(TimerManager &timerManager);
+private:
+    void handleTimer(TimerNodeList &timerManager);
+public:
     void addTimer();
     void linkTimer(std::shared_ptr<TimerNode> timernode);
-    void untieTimer();
+    //void untieTimer();
     void setExpTime(int timeout);
     int getExpTime() const;
 public:
@@ -43,6 +46,7 @@ public:
 public:
     void setHolder(std::shared_ptr<HttpConn> httpconn);
     std::shared_ptr<HttpConn> getHolder();
+    std::shared_ptr<TimerNode> getTimer();
 public:
     void setFd(int fd);
     int getFd() const;

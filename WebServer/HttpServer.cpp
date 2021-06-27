@@ -9,7 +9,7 @@
 #include <sys/mman.h>
 #include "HttpServer.h"
 
-const int DEFAULT_KEEP_ALIVE_TIME = 5 * 60 * 1000;  //keep alive for 5 min
+const int DEFAULT_KEEP_ALIVE_TIME = 5 * 1000;  //keep alive for 5 min
 
 pthread_once_t MimeType::once_control = PTHREAD_ONCE_INIT;
 std::unordered_map<std::string, std::string> MimeType::mime;

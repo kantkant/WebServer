@@ -35,5 +35,7 @@ add_executable(${PROJECT_NAME}
 	./WebServer/HttpServer.h
 	./WebServer/HttpServer.cpp
 	./WebServer/deamon.h
+	./WebServer/TimerNodeList.h
+	./WebServer/TimerNodeList.cpp
 )
 target_link_libraries(${PROJECT_NAME} -lpthread)

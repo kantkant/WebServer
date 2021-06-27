@@ -10,6 +10,7 @@
 #include <sys/eventfd.h>
 #include <functional>
 #include "Timer.h"
+#include "TimerNodeList.h"
 
 class Epoll; //fix bug
 class Channel; //fix bug
@@ -29,6 +30,7 @@ public:
     void queueInLoop(funcCallback&& cb);
     void handleExpired();
     void addTimer(std::shared_ptr<Channel> channel, int TIMEOUT);
+    void deleteTimer(std::shared_ptr<Channel> channel);
 private:
     bool isloopInthisThread() const;
     void handleRead();
@@ -42,7 +44,7 @@ private:
     std::vector<funcCallback> pendingfunctors_;
     bool callingPendingFunctors_;
     std::shared_ptr<Channel> wakeupChannel_;
-    TimerManager timerManager_;
+    TimerNodeList timerManager_;
 public:
     std::shared_ptr<Epoll> epoller_;
 };

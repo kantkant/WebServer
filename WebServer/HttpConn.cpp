@@ -73,9 +73,9 @@ void HttpConn::handleWrite() { //care about buffer free
         handleClose();   //shutdown when finish write
         //shutDownInConn();
         /*
-        这里在进行压测时遇到了一些问题，如果短链接调用shutDownInConn，
-        客端调用关闭速度较慢的情况下，可能出现Fd耗尽的情况
-        调用shutDownInConn相当于把主动权交给了客端，对于恶意请求或者高并发的情况，没有更好的办法。
+        这里在进行压测时遇到了一些问题，如果短链接调用 shutDownInConn，
+        客端调用关闭速度较慢的情况下，可能出现服务挂掉的情况
+        调用shutDownInConn相当于把主动权交给了客端，对于恶意请求没有更好的办法。
         目前暂定为handleColse()，后续可能做出改进。
         */
         //std::cout << "shutdown" << std::endl;
@@ -108,7 +108,8 @@ void HttpConn::handleNewEvents() {
 void HttpConn::handleClose() {
     connectionState_ = H_DISCONNECTED;
     std::shared_ptr<HttpConn> guard(shared_from_this());
-    channel_->untieTimer();
+    //channel_->untieTimer();
+    loop_->deleteTimer(channel_);
     loop_->removeFromPoller(channel_);
     httpServer_->closeCallback();
     //shutdown(channel_->getFd(), SHUT_WR);

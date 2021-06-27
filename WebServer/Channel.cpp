@@ -67,11 +67,16 @@ std::shared_ptr<HttpConn> Channel::getHolder() {
     return tmp;
 }
 
+std::shared_ptr<TimerNode> Channel::getTimer() {
+    std::shared_ptr<TimerNode> tmp(timer_.lock());
+    return tmp;
+}
+
 void Channel::setFd(int fd) { fd_ = fd; }
 
 int Channel::getFd() const{ return fd_; }
 
-void Channel::handleEvents(TimerManager &timerManager) {
+void Channel::handleEvents(TimerNodeList &timerManager) {
     if(timer_.lock()) {
         //std::cout << "handleTimer" << std::endl;
         handleTimer(timerManager);
@@ -90,7 +95,7 @@ void Channel::handleEvents(TimerManager &timerManager) {
     }
 }
 
-void Channel::handleTimer(TimerManager &timerManager) {
+void Channel::handleTimer(TimerNodeList &timerManager) {
     //untieTimer(); //priority queue can't support "find"
     std::shared_ptr<HttpConn> httpconn = getHolder();
     if(httpconn) {
@@ -106,7 +111,7 @@ void Channel::linkTimer(std::shared_ptr<TimerNode> timernode) {
     timer_ = timernode;
     //std::cout << timer_.lock().use_count() << std::endl;
 }
-
+/*
 void Channel::untieTimer() {
     if(timer_.lock()) {
         //std::cout << "untie" << std::endl;
@@ -116,7 +121,7 @@ void Channel::untieTimer() {
         //std::cout << timer_.lock() << std::endl;
     }
 }
-
+*/
 void Channel::setExpTime(int timeout) {
     expiredTime_ = timeout;
     if(timer_.lock()) {

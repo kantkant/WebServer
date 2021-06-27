@@ -8,6 +8,7 @@
 #include "./base/MutexLock.h"
 #include "./base/Condition.h"
 
+
 __thread EventLoop* loopInthisThread_ = nullptr;
 EventLoop::EventLoop()
     :looping_(false),
@@ -109,9 +110,17 @@ void EventLoop::removeFromPoller(std::shared_ptr<Channel> channel) {
 }
 
 void EventLoop::handleExpired() { 
-    timerManager_.handleExpiredEvent();
+    timerManager_.handleExpiredTimer();
 }
 
 void EventLoop::addTimer(std::shared_ptr<Channel> channel, int TIMEOUT) {
     timerManager_.addTimer(channel, TIMEOUT);
+}
+
+void EventLoop::deleteTimer(std::shared_ptr<Channel> channel) {
+    std::shared_ptr<TimerNode> timer = channel->getTimer();
+    if(timer && !timer->isDeleting()) {
+        timer->clearReq();
+        timerManager_.deleteTimer(timer);
+    }
 }
