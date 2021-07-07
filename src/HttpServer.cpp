@@ -15,10 +15,10 @@ pthread_once_t MimeType::once_control = PTHREAD_ONCE_INIT;
 std::unordered_map<std::string, std::string> MimeType::mime;
 
 void MimeType::init() {
-    mime["main"] = "<a href=\"https://github.com/kantkant/WebServer\">项目github地址</a><br><a href=\"https://docs.qq.com/doc/DS0hNRk5iV2ZpT3pZ\">项目记录文档</a><br><a href=\"http://neijuanwang.com/hello\">线下压力测试地址</a><br><hr><em> Kant's Web Server</em></body></html>";
+    mime["main"] = "<a href=\"http://wiki.baidu.com/pages/viewpage.action?pageId=1560843796\">baidu-wiki</a><br><a href=\"https://github.com/kantkant/WebServer\">github</a><br><a href=\"https://docs.qq.com/doc/DS0hNRk5iV2ZpT3pZ\">records</a><br><a href=\"http://www.neijuanwang.com/hello\">test</a><br><hr><em> Kant's Web Server</em></body></html>";
     mime["default"] = "400";
     mime["hello"] = "Hello, World!";
-    mime["xiaojingjing"] = "o.o<br><hr><em> Kant's Web Server</em></body></html>";
+    mime["xiaojingjing"] = "o.o>";
 }
 
 std::string MimeType::getMime(const std::string &suffix) {
@@ -94,7 +94,7 @@ void HttpServer::handleError(std::string errormsg, int errorcode) {
     //std::cout << "hadleError" << std::endl;
     errormsg = " " + errormsg;
     std::string body_buff, header_buff;
-    body_buff += "<html><title>哎~出错了</title>";
+    body_buff += "<html><title>oops~</title>";
     body_buff += "<body bgcolor=\"ffffff\">";
     body_buff += std::to_string(errorcode) + errormsg;
     body_buff += "<hr><em> Kant's Web Server</em></body></html>";
