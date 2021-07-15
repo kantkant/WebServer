@@ -7,7 +7,7 @@ Channel::Channel(EventLoop* loop, int fd)
      fd_(fd),
      events_(0),
      expiredTime_(5*60*1000) {
-         //std::cout << "Channel construct" << std::endl;
+         std::cout << "Channel construct" << std::endl;
     }
 
 Channel::Channel(EventLoop* loop)
@@ -17,7 +17,7 @@ Channel::Channel(EventLoop* loop)
 
 Channel::~Channel() {
     close(fd_);
-    //std::cout << "Channel distruct" << std::endl;
+    std::cout << "Channel distruct" << std::endl;
 }
 
 void Channel::setReadcallback(callBack&& cb) { readcallback_ = std::move(cb); }

@@ -40,9 +40,9 @@ ValueType set_get_attrib(const char *name, ValueType value)
 #undef LOG_ERROR
 #undef LOG_FATAL
 
-#define _WEBSERVER_CUSTOM_LOG(logger_c72b2365_c975_4d01_b20d_2d7c207ff383, sev) \
+#define _WEBSERVER_CUSTOM_LOG(logger, sev) \
     BOOST_LOG_STREAM_WITH_PARAMS( \
-                                  (logger_c72b2365_c975_4d01_b20d_2d7c207ff383), \
+                                  (logger), \
                                   (set_get_attrib("File", path_to_filename(__FILE__))) \
                                   (set_get_attrib("Line", __LINE__)) \
                                   (::boost::log::keywords::severity = sev) \

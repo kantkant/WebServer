@@ -15,10 +15,10 @@ pthread_once_t MimeType::once_control = PTHREAD_ONCE_INIT;
 std::unordered_map<std::string, std::string> MimeType::mime;
 
 void MimeType::init() {
-    mime["main"] = "<a href=\"http://wiki.baidu.com/pages/viewpage.action?pageId=1560843796\">baidu-wiki</a><br><a href=\"https://github.com/kantkant/WebServer\">github</a><br><a href=\"https://docs.qq.com/doc/DS0hNRk5iV2ZpT3pZ\">records</a><br><a href=\"http://www.neijuanwang.com/hello\">test</a><br><hr><em> Kant's Web Server</em></body></html>";
+    mime["main"] = "<a href=\"http://wiki.baidu.com/pages/viewpage.action?pageId=1560843796\">baidu-wiki</a><br><a href=\"https://github.com/kantkant/WebServer\">github</a><br><a href=\"https://docs.qq.com/doc/DS0hNRk5iV2ZpT3pZ\">records</a><br><a href=\"http://www.neijuanwang.com/hello\">test</a><br><a href=\"https://docs.qq.com/doc/DS1h3UkJUWUVMVHBv\">summary</a><br><hr><em> Kant's Web Server</em></body></html>";
     mime["default"] = "400";
     mime["hello"] = "Hello, World!";
-    mime["xiaojingjing"] = "o.o>";
+    mime["xiaojingjing"] = "o.o";
 }
 
 std::string MimeType::getMime(const std::string &suffix) {
@@ -40,10 +40,10 @@ HttpServer::HttpServer():
     isReadAgain_(false),
     nowReadPos_(0),
     hState_(H_START) {
-        //std::cout << "httpServer construct" << std::endl;
+        std::cout << "httpServer construct" << std::endl;
     }
 HttpServer::~HttpServer() {
-    //std::cout << "httpServer distruct" << std::endl;
+    std::cout << "httpServer distruct" << std::endl;
 }
 
 void HttpServer::messageCallback(std::string &inbuffer, std::string &outBuffer) { //how to deal with data?

@@ -5,6 +5,7 @@
 #include "./base/MutexLock.h"
 #include "./base/Condition.h"
 #include "noncopyable.h"
+#include "log/log.h"
 
 class EventLoopThread : noncopyable {  //deleted exiting, have no idea about it
 public:

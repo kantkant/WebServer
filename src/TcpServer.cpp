@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "log/log.h"
 
 TcpServer::TcpServer(EventLoop* loop, int threadnum, int port) 
     :loop_(loop), 
@@ -18,11 +19,12 @@ TcpServer::TcpServer(EventLoop* loop, int threadnum, int port)
      start_(false),
      idleFd_(open("/dev/null", O_RDONLY | O_CLOEXEC)),
      listenFd_(socket_bind_listen(port_)) {
+        LOG_DEBUG << "Server init start .";
         setSocketNonBlocking(listenFd_);
         setSocketNodelayBytes(listenFd_, 4096);
         //acceptChannel_(std::move(new Channel(loop_, listenFd_))); //wrong,
         acceptChannel_ = std::make_shared<Channel>(loop_, listenFd_); //behind setsocketnonblocking
-        //std::cout << "listeningFd: " << listenFd_ << std::endl;
+        LOG_DEBUG << "listeningFd: " << listenFd_ << std::endl;
         handle_for_sigpipe(); //avoid Ksoftirqd 3, not worked
     }
 
@@ -34,11 +36,11 @@ void TcpServer::start() {
     eventloopThreadpool_->start();
     //loop_->epoller_->epoll_add(acceptChannel_, 0);
     loop_->addtoPoller(acceptChannel_);
-    //std::cout << "TcpServer start" << std::endl;
+    std::cout << "TcpServer start" << std::endl;
 }
 
 void TcpServer::handleConnection() { //send work to channel
-    //std::cout << "TcpServer new Connection" << std::endl;
+    LOG_DEBUG << "TcpServer new Connection";
     struct sockaddr_in clientAddr;
     memset(&clientAddr, 0, sizeof(struct sockaddr_in));
     socklen_t clientAddrLen = sizeof(clientAddr);
@@ -57,7 +59,7 @@ void TcpServer::handleConnection() { //send work to channel
         subLoop->runInLoop(std::bind(&HttpConn::handleNewEvents, httpconn)); //set conn task in channel
     }
     if(errno == EMFILE) {
-        //std::cout << "hahah" << std::endl;
+        LOG_ERROR << "EMFILE";
         close(idleFd_);
         idleFd_ = accept(listenFd_, (struct sockaddr*)&clientAddr, &clientAddrLen);
         close(idleFd_);

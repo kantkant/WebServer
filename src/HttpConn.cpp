@@ -19,11 +19,11 @@ HttpConn::HttpConn(EventLoop* loop, int fd)
          channel_->setReadcallback(std::bind(&HttpConn::handleRead, this));
          channel_->setWritecallback(std::bind(&HttpConn::handleWrite, this));
          channel_->setCloseCallBack(std::bind(&HttpConn::handleClose, this));
-         //std::cout << "httpConn construct" << std::endl;
+         std::cout << "httpConn construct" << std::endl;
     }
 
 HttpConn::~HttpConn() {
-    //std::cout << "httpConn distruct" << std::endl;
+    std::cout << "httpConn distruct" << std::endl;
 }
 
 void HttpConn::enableWriting() {
@@ -56,7 +56,7 @@ void HttpConn::handleRead() {
         handleWrite();
     }
     else {
-        handleError();
+        handleClose();
     }
 }
 
@@ -106,6 +106,7 @@ void HttpConn::handleNewEvents() {
 }
 
 void HttpConn::handleClose() {
+    //std::cout << "close" << std::endl;
     connectionState_ = H_DISCONNECTED;
     std::shared_ptr<HttpConn> guard(shared_from_this());
     //channel_->untieTimer();

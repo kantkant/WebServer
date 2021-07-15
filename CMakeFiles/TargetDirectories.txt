@@ -1,0 +1,16 @@
+/home/ubuntu/workdir/zxx/WebServer/CMakeFiles/install.dir
+/home/ubuntu/workdir/zxx/WebServer/CMakeFiles/install/local.dir
+/home/ubuntu/workdir/zxx/WebServer/CMakeFiles/list_install_components.dir
+/home/ubuntu/workdir/zxx/WebServer/CMakeFiles/edit_cache.dir
+/home/ubuntu/workdir/zxx/WebServer/CMakeFiles/rebuild_cache.dir
+/home/ubuntu/workdir/zxx/WebServer/src/CMakeFiles/install.dir
+/home/ubuntu/workdir/zxx/WebServer/src/CMakeFiles/rebuild_cache.dir
+/home/ubuntu/workdir/zxx/WebServer/src/CMakeFiles/install/local.dir
+/home/ubuntu/workdir/zxx/WebServer/src/CMakeFiles/list_install_components.dir
+/home/ubuntu/workdir/zxx/WebServer/src/CMakeFiles/myWebServerd.dir
+/home/ubuntu/workdir/zxx/WebServer/src/CMakeFiles/edit_cache.dir
+/home/ubuntu/workdir/zxx/WebServer/src/base/CMakeFiles/install.dir
+/home/ubuntu/workdir/zxx/WebServer/src/base/CMakeFiles/install/local.dir
+/home/ubuntu/workdir/zxx/WebServer/src/base/CMakeFiles/list_install_components.dir
+/home/ubuntu/workdir/zxx/WebServer/src/base/CMakeFiles/edit_cache.dir
+/home/ubuntu/workdir/zxx/WebServer/src/base/CMakeFiles/rebuild_cache.dir

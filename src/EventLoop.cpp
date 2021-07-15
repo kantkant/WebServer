@@ -7,6 +7,7 @@
 #include "Channel.h"
 #include "./base/MutexLock.h"
 #include "./base/Condition.h"
+#include "log/log.h"
 
 
 __thread EventLoop* loopInthisThread_ = nullptr;
@@ -19,6 +20,9 @@ EventLoop::EventLoop()
      wakeupFd_(createEventFd()), 
      wakeupChannel_(new Channel(this, wakeupFd_)) { //C++11 with std::thread::get_id()
         //assert(this == nullptr);  can't use in constructor, why?
+        LOG_DEBUG << "event loop start";
+        LOG_INFO << "loopInthisThread : " << loopInthisThread_
+                 << "this : " << this;
         if(!loopInthisThread_) {loopInthisThread_ = this;}
         wakeupChannel_->setEvents(EPOLLIN | EPOLLET);
         wakeupChannel_->setReadcallback(std::bind(&EventLoop::handleRead, this)); //watch out std::bind
@@ -82,6 +86,7 @@ void EventLoop::wakeup() { //where should i read?
 void EventLoop::handleRead() {
     uint64_t spOffer = 1;
     ssize_t n = readn(wakeupFd_, &spOffer, sizeof spOffer); //figure out what's going on
+    LOG_DEBUG << "handleRead res : " << n;
 }
 
 void EventLoop::doPendingFunctors() {
