@@ -7,6 +7,10 @@ if [ -f CMakeCache.txt ]; then
     rm CMakeCache.txt
 fi
 
+if [ myWebServerd ]; then
+    rm myWebServerd
+fi
+
 cmake .
 make
 

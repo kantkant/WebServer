@@ -6,8 +6,8 @@
 
 int main(){
     init("WebServer"); // init log modules
-    //LOG_DEBUG << "init start";
-    //create_deamon();
+    LOG_DEBUG << "init start";
+    create_deamon();
     EventLoop loop;
     //loop.loop();
     TcpServer server(&loop, 3, 80);

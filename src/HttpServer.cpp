@@ -8,17 +8,55 @@
 #include <cstring>
 #include <sys/mman.h>
 #include "HttpServer.h"
+#include <fstream>
 
 const int DEFAULT_KEEP_ALIVE_TIME = 5 * 1000;  //keep alive for 5 min
 
 pthread_once_t MimeType::once_control = PTHREAD_ONCE_INIT;
 std::unordered_map<std::string, std::string> MimeType::mime;
 
+
+static std::string getFileContent(const std::string& path) //temproraly used!!!
+{
+    std::fstream fs;
+    std::string mainStr, line;  
+    //std::cout << path << std::endl;
+    std::string str;
+    str += '/';
+    str += path;
+    fs.open(str, std::ios::in | std::ios::binary);
+    
+    if(!fs) {
+        std::cout << "error" << std::endl;
+    }
+    
+    while(getline(fs, line)) {
+        line += '\n';
+        mainStr += line;
+    }
+    //std::cout << mainStr << std::endl;
+    fs.close();
+    return mainStr;
+}
+
+
 void MimeType::init() {
-    mime["main"] = "<a href=\"http://wiki.baidu.com/pages/viewpage.action?pageId=1560843796\">baidu-wiki</a><br><a href=\"https://github.com/kantkant/WebServer\">github</a><br><a href=\"https://docs.qq.com/doc/DS0hNRk5iV2ZpT3pZ\">records</a><br><a href=\"http://www.neijuanwang.com/hello\">test</a><br><a href=\"https://docs.qq.com/doc/DS1h3UkJUWUVMVHBv\">summary</a><br><hr><em> Kant's Web Server</em></body></html>";
+    //mime["main"] = "<a href=\"http://wiki.baidu.com/pages/viewpage.action?pageId=1560843796\">baidu-wiki</a><br><a href=\"https://github.com/kantkant/WebServer\">github</a><br><a href=\"https://docs.qq.com/doc/DS0hNRk5iV2ZpT3pZ\">records</a><br><a href=\"http://www.neijuanwang.com/hello\">test</a><br><a href=\"https://docs.qq.com/doc/DS1h3UkJUWUVMVHBv\">summary</a><br><hr><em> Kant's Web Server</em></body></html>";
+    std::fstream fs;
+    std::string mainStr, line;
+    fs.open("/home/ubuntu/workdir/zxx/photo/index.html");
+    while(getline(fs, line)) {
+        line += '\n';
+        mainStr += line;
+    }
+    mime["main"] = mainStr;
     mime["default"] = "400";
     mime["hello"] = "Hello, World!";
-    mime["xiaojingjing"] = "o.o";
+    mime["xiaojingjing"] = "o.o您好";
+    mime["home/ubuntu/workdir/zxx/photo/img/1.png"] = "image/png";
+    mime["home/ubuntu/workdir/zxx/photo/img/2.png"] = "image/png";
+    mime["home/ubuntu/workdir/zxx/photo/img/3.png"] = "image/png";
+    mime["home/ubuntu/workdir/zxx/photo/img/4.png"] = "image/png";
 }
 
 std::string MimeType::getMime(const std::string &suffix) {
@@ -40,10 +78,10 @@ HttpServer::HttpServer():
     isReadAgain_(false),
     nowReadPos_(0),
     hState_(H_START) {
-        std::cout << "httpServer construct" << std::endl;
+        //std::cout << "httpServer construct" << std::endl;
     }
 HttpServer::~HttpServer() {
-    std::cout << "httpServer distruct" << std::endl;
+    //std::cout << "httpServer distruct" << std::endl;
 }
 
 void HttpServer::messageCallback(std::string &inbuffer, std::string &outBuffer) { //how to deal with data?
@@ -250,6 +288,16 @@ AnalysisState HttpServer:: analysisRequest() {  //to do : 20210619
             //std::cout << "keepalive" << keepAlive_ << std::endl;
             header += std::string("Connection: Keep-Alive\r\n") + "Keep-Alive: timeout=" + std::to_string(DEFAULT_KEEP_ALIVE_TIME) + "\r\n";
         }
+        if(resourceName_ == "favicon.ico") {
+            std::string favicon = getFileContent("home/ubuntu/workdir/zxx/photo/img/5.jpg");
+            header += "Content-Length: " + std::to_string(static_cast<int>(favicon.size())) + "\r\n";
+            header += "Content-Type: image/png\r\n";   
+            header += "Server: Kant's Web Server\r\n";
+            header += "\r\n";
+            outBuffer_ += header;
+            outBuffer_ += favicon;
+            return ANALYSIS_SUCCESS;
+        }
         //std::cout << resourceName_ << std::endl;
         std::string resourceContent = MimeType::getMime(resourceName_);
        // std::cout << resourceContent << std::endl;
@@ -257,8 +305,16 @@ AnalysisState HttpServer:: analysisRequest() {  //to do : 20210619
             //std::cout << "400" << std::endl;
             handleError();
             return ANALYSIS_ERROR;
+        }     
+        //header += "Content-Length: " + std::to_string(static_cast<int>(resourceContent.size())) + "\r\n";
+        if(resourceContent == "image/png") { //temproraly used!!!
+            header += "Content-Length: " + std::to_string(static_cast<int>(getFileContent(resourceName_).size())) + "\r\n";
+            header += "Content-Type: image/png\r\n";
         }
-        header += "Content-Length: " + std::to_string(static_cast<int>(resourceContent.size())) + "\r\n";
+        else {
+            header += "Content-Length: " + std::to_string(static_cast<int>(resourceContent.size())) + "\r\n";
+            header += "Content-Type: text/html; charset=UTF-8\r\n";  
+        }
         header += "Server: Kant's Web Server\r\n";
         header += "\r\n";
         // 头部结束
@@ -266,7 +322,12 @@ AnalysisState HttpServer:: analysisRequest() {  //to do : 20210619
         if(method_ == METHOD_HEAD) {
             return ANALYSIS_SUCCESS;
         }
-        outBuffer_ += resourceContent;
+        if(resourceContent == "image/png") { //temproraly used!!!
+            outBuffer_ += getFileContent(resourceName_);
+        }
+        else {
+            outBuffer_ += resourceContent;
+        }
         return ANALYSIS_SUCCESS;
     }
 }

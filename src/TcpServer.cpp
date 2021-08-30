@@ -36,7 +36,7 @@ void TcpServer::start() {
     eventloopThreadpool_->start();
     //loop_->epoller_->epoll_add(acceptChannel_, 0);
     loop_->addtoPoller(acceptChannel_);
-    std::cout << "TcpServer start" << std::endl;
+    //std::cout << "TcpServer start" << std::endl;
 }
 
 void TcpServer::handleConnection() { //send work to channel

@@ -19,11 +19,11 @@ HttpConn::HttpConn(EventLoop* loop, int fd)
          channel_->setReadcallback(std::bind(&HttpConn::handleRead, this));
          channel_->setWritecallback(std::bind(&HttpConn::handleWrite, this));
          channel_->setCloseCallBack(std::bind(&HttpConn::handleClose, this));
-         std::cout << "httpConn construct" << std::endl;
+         //std::cout << "httpConn construct" << std::endl;
     }
 
 HttpConn::~HttpConn() {
-    std::cout << "httpConn distruct" << std::endl;
+    //std::cout << "httpConn distruct" << std::endl;
 }
 
 void HttpConn::enableWriting() {
@@ -42,6 +42,9 @@ void HttpConn::handleRead() {
     inBuffer_.clear();
     bool isFIN = false;
     ssize_t n = readn(channel_->getFd(), inBuffer_, isFIN); //let channel get fd;
+    //std::cout << "----------------------------" << std::endl;
+    //std::cout << inBuffer_ << std::endl;
+    //std::cout << "----------------------------" << std::endl;
     //std::cout << "handleRead" << std::endl;
     if(n > 0) {
         //std::cout << "MessegeComplete" << std::endl;
@@ -56,6 +59,7 @@ void HttpConn::handleRead() {
         handleWrite();
     }
     else {
+        //RST
         handleClose();
     }
 }
@@ -69,7 +73,7 @@ void HttpConn::handleWrite() { //care about buffer free
         //std::cout << "WriteComp" << std::endl;
         httpServer_->writeCompleteCallback();  //watch out !!!!! 6/18
     }
-    if(n > 0 && n == outBufSize && !closeInWrite_ && (!httpServer_->isKeepAilve() || connectionState_ == H_DISCONNECTING)) {
+    if(n >= 0 && n == outBufSize && (!httpServer_->isKeepAilve() || connectionState_ == H_DISCONNECTING || closeInWrite_)) {
         handleClose();   //shutdown when finish write
         //shutDownInConn();
         /*
@@ -81,18 +85,15 @@ void HttpConn::handleWrite() { //care about buffer free
         //std::cout << "shutdown" << std::endl;
         return;
     }
-    if(n > 0 && n == outBufSize && !closeInWrite_ && isWriting_) {
+    if(n >= 0 && n == outBufSize && !closeInWrite_ && isWriting_) {
         disableWriting();
     }
-    if(n > 0 && n == outBufSize && closeInWrite_) {
-        handleClose();
-    }
-    if(n >= 0 && n < outBufSize && !isWriting_) {
+    if(n >= 0 && n < outBufSize && !isWriting_) { //outbufsize != 0, but n->[0, outbufsize]
         enableWriting();
     }
-    if(n <= 0) {
-        //bad syscall
-        handleError();
+    if(n < 0) {
+        //error
+        handleClose();
     }
 }
 

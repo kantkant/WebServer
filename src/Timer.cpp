@@ -11,14 +11,14 @@ TimerNode::TimerNode(std::shared_ptr<Channel> channel, int timeout)
         struct timeval now; //ms
         gettimeofday(&now, nullptr);
         expTime_  = (((now.tv_sec % 10000) * 1000) + (now.tv_usec / 1000)) + timeout;
-        std::cout << "Timer construct" << std::endl;
+        //std::cout << "Timer construct" << std::endl;
     }
 
 TimerNode::TimerNode() 
     :isDeleting_(false),
      pre(nullptr),
      next(nullptr){
-  std::cout << "Timer construct" << std::endl;
+  //std::cout << "Timer construct" << std::endl;
 };
 
 TimerNode::~TimerNode() {
@@ -27,7 +27,7 @@ TimerNode::~TimerNode() {
       //std::cout << "close" << std::endl;
     channel_.lock()->handleClose();
   }
-  std::cout << "Timer distruct" << std::endl;
+  //std::cout << "Timer distruct" << std::endl;
 }
 
 bool TimerNode::isDeleting() const {

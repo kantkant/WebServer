@@ -49,19 +49,19 @@ ValueType set_get_attrib(const char *name, ValueType value)
                                 )
 
 #define LOG_TRACE \
-    _WEBSERVER_CUSTOM_LOG(slg, trace)
+    if (false) _WEBSERVER_CUSTOM_LOG(slg, trace)
 
 #define LOG_DEBUG \
-    _WEBSERVER_CUSTOM_LOG(slg, debug)
+    if (false) _WEBSERVER_CUSTOM_LOG(slg, debug)
 
 #define LOG_INFO \
-    _WEBSERVER_CUSTOM_LOG(slg, info)
+    if (false) _WEBSERVER_CUSTOM_LOG(slg, info)
 
 #define LOG_WARN \
-    _WEBSERVER_CUSTOM_LOG(slg, warning)
+    if (false) _WEBSERVER_CUSTOM_LOG(slg, warning)
 
 #define LOG_ERROR \
-    _WEBSERVER_CUSTOM_LOG(slg, error)
+    if (false) _WEBSERVER_CUSTOM_LOG(slg, error)
 
 #define LOG_FATAL \
-    _WEBSERVER_CUSTOM_LOG(slg, fatal)
+    if (false) _WEBSERVER_CUSTOM_LOG(slg, fatal)
